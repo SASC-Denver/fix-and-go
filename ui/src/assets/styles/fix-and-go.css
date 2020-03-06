@@ -1,0 +1,300 @@
+/**
+ * fix-and-go customizations
+ */
+@import url(https://fonts.googleapis.com/css?family=Dosis:200,300,400,500,600,700,800);
+
+input,
+select,
+textarea {
+	color: #222;
+}
+
+.custom-menu-top {
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+.pure-menu-horizontal.pure-menu-scrollable.custom-menu-bottom {
+	padding-bottom: 3px;
+	padding-top: 3px;
+}
+
+.custom-menu-toggle {
+	top: 0px;
+}
+
+.custom-menu-screen {
+	height: 2.6em;
+}
+
+#menu {
+	line-height: 1.6;
+}
+
+
+/**
+Cube
+ */
+
+
+.slidecontainer {
+	height: 40px;
+	text-align: center;
+	width: 100%;
+}
+
+.sliderControl {
+	-webkit-appearance: none;
+	width: 70%;
+	height: 5px;
+	background: #d3d3d3;
+	outline: none;
+	opacity: 0.7;
+	-webkit-transition: .2s;
+	transition: opacity .2s;
+}
+
+.sliderControl:hover {
+	opacity: 1;
+}
+
+.sliderControl::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 35px;
+	height: 35px;
+	background: #333333;
+	cursor: pointer;
+	border-radius: 18px;
+}
+
+.sliderControl::-moz-range-thumb {
+	width: 35px;
+	height: 35px;
+	background: #333333;
+	cursor: pointer;
+	border-radius: 18px;
+}
+
+
+.app-button {
+	border: 3px solid black;
+	border-radius: 30px;
+	color: black;
+	font-size: 1.5em;
+	height: 50px;
+	line-height: 46px;
+	text-align: center;
+	vertical-align: middle;
+	width: 50px;
+}
+
+var {
+	font-style: normal;
+}
+
+.moveDown {
+	bottom: 10px;
+	position: absolute;
+	right: 133px;
+	transform: rotate(90deg);
+}
+
+.moveLeft {
+	left: 10px;
+	position: absolute;
+	top: 133px;
+	transform: rotate(180deg);
+}
+
+.moveRight {
+	right: 10px;
+	position: absolute;
+	top: 133px;
+}
+
+.moveUp {
+	right: 133px;
+	position: absolute;
+	top: 10px;
+	transform: rotate(270deg);
+}
+
+.switchDirection {
+	right: 133px;
+	position: absolute;
+	top: 133px;
+	transform: rotate(-45deg);
+}
+
+/**
+Remove scrolling on IOS devices
+ */
+article,
+body,
+html {
+	height: 100%;
+	position: fixed;
+	width: 100%;
+}
+
+/*
+https://w3bits.com/prevent-chrome-pull-to-refresh-css/
+ */
+body,
+.wrapper {
+	/* Break the flow */
+	position: absolute;
+	top: 0px;
+
+	/* Give them all the available space */
+	width: 100%;
+	height: 100%;
+
+	/* Remove the margins if any */
+	margin: 0;
+
+	/* Allow them to scroll down the document */
+	overflow-y: hidden;
+}
+
+body {
+	/* Sending body at the bottom of the stack */
+	z-index: 1;
+}
+
+.wrapper {
+	/* Making the wrapper stack above the body */
+	z-index: 2;
+}
+
+/**
+Form field styling
+ */
+.field.invalid {
+	border: 1px solid #b00 !important;
+	border-bottom-right-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.field.modified {
+	border: 1px solid #66f !important;
+	border-bottom-right-radius: 2px;
+	border-left: 5px solid #66f !important;
+	border-top-right-radius: 2px;
+}
+
+.field.requiredInvalid {
+	border-left: 5px solid #b00 !important;
+}
+
+.field.requiredValid {
+	border-left: 5px solid #0b0 !important;
+}
+
+input.field {
+	padding: 0.5em 0.6em;
+	display: inline-block;
+	border: 0px;
+	vertical-align: middle;
+}
+
+.error {
+	color: #b00;
+	padding-left: 5px;
+}
+
+.field-label {
+	height: 18px;
+}
+
+i {
+	display: inline-block;
+}
+
+.field {
+	border-left: 5px solid #aaa !important;
+	border-bottom: 1px solid #aaa !important;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+}
+
+.fieldAid {
+	float: right;
+}
+
+.dropdown {
+	background-color: white;
+	border-radius: 3px;
+	box-shadow: 5px 5px 1px #777;
+	position: absolute;
+	z-index: 100;
+}
+
+.submitButton {
+	margin: auto;
+	display: block;
+}
+
+/*
+.centering {
+    position: relative;
+}
+*/
+
+.centeredUpsideDown {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.multiRowIconsCenter {
+	padding-top: 5px;
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.smallPadding {
+	margin-block-end: 0.2em;
+	margin-block-start: 0.2em;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+	outline: none;
+}
+
+
+#cube {
+	transition: transform 128ms linear
+}
+
+/*
+#cube.toggle {
+	transition: transform 600ms linear
+}
+
+#cube.cubeView {
+	transition: transform 128ms linear
+}
+
+#cube.cubeView.toggle {
+	transition: transform 700ms linear
+}
+*/
+
+p {
+	margin: 0;
+}
+
+.upClose {
+	box-shadow: 0px 10px 10px 0px #000;
+}
+
+.farAway {
+	box-shadow: 0px 2px 3px 0px #000;
+}

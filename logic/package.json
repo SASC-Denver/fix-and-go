@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "firebase": "^7.10.0-0",
+    "firebaseui": "^4.4.0"
+  },
+  "devDependencies": {
+    "svelte": "^3.16.3",
+    "tslint": "^5.20.1",
+    "typescript": "^3.8.2"
+  },
+  "main": "lib/index.js",
+  "name": "@fix-and-go/logic",
+  "typings": "lib/index",
+  "version": "0.0.1"
+}

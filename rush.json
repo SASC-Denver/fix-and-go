@@ -1,0 +1,22 @@
+{
+  // NOTE: Comments are allowed in all Rush config files :-)
+  "rushVersion": "5.20.0",
+  "pnpmVersion": "4.11.1",
+  "nodeSupportedVersionRange": ">=10.0.0 <14.0.0",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 2,
+
+  "projects": [
+    // "apps" folder (alphabetical order)
+    {
+      "packageName": "@fix-and-go/ui",
+      "projectFolder": "ui",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@fix-and-go/logic",
+      "projectFolder": "logic",
+      "shouldPublish": true
+    }
+  ]
+}

@@ -1,2 +1,3 @@
-# fix-and-go
-Fix your spaceship and go!
+# Fix-n-Go
+
+A quest game written by Programming Students of SASC Denver.
