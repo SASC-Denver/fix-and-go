@@ -25,7 +25,7 @@ const htmlOpts = {
 	meta: {
 		'viewport': 'width=device-width'
 	},
-	title: 'Votecube'
+	title: 'Fix-n-Go'
 }
 
 const mode = devMode ? 'development' : 'production'
@@ -91,15 +91,15 @@ module.exports = {
 					name: 'vendor',
 					chunks: 'all'
 				},
-				votecube: {
+				fixAndGo: {
 					test: (module) => {
 						const context = module.context
 						const targets = [
-							'@votecube',
+							'@fix-and-go',
 						]
 						return context && context.indexOf('node_modules') >= 0 && targets.find(t => context.indexOf(/${t}/) > -1)
 					},
-					name: 'votecube',
+					name: 'fix-and-go',
 					chunks: 'all'
 				},
 			},

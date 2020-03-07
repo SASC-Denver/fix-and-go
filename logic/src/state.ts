@@ -148,7 +148,7 @@ function createTextToast(): ITextToastStore {
 export let stateOfAuthChecked    = writable(false)
 export let stateOfCurrentScreen  = writable<IScreenConfig>(null)
 export let stateOfMode           = writable<string>(null)
-export let stateOfPageTitle      = writable('Votecube')
+export let stateOfPageTitle      = writable('Fix-n-go')
 export let stateOfPopup          = writable<boolean>(false)
 export let stateOfShowConfirm    = writable(false)
 export let stateOfShowMainMenu   = createShowMainMenu()
