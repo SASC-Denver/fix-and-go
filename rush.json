@@ -9,13 +9,18 @@
   "projects": [
     // "apps" folder (alphabetical order)
     {
-      "packageName": "@fix-and-go/ui",
-      "projectFolder": "ui",
+      "packageName": "@fix-and-go/client",
+      "projectFolder": "client",
       "shouldPublish": true
     },
     {
       "packageName": "@fix-and-go/logic",
       "projectFolder": "logic",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@fix-and-go/server",
+      "projectFolder": "server",
       "shouldPublish": true
     }
   ]

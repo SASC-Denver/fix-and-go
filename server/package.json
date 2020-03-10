@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "fastify": "^2.12.1"
+  },
+  "devDependencies": {
+    "tslint": "^5.20.1",
+    "typescript": "^3.8.2"
+  },
+  "main": "lib/index.js",
+  "name": "@fix-and-go/server",
+  "typings": "lib/index",
+  "version": "0.0.1"
+}
