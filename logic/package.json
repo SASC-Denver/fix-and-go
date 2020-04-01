@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "firebase": "^7.10.0-0",
-    "firebaseui": "^4.4.0"
   },
   "devDependencies": {
     "svelte": "^3.16.3",
