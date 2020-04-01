@@ -2,5 +2,9 @@
 
 /common/temp/**
 
+/logic/lib/
+/server/lib/
+
 # Dependency directories
 **/node_modules/
+**/.rush/temp/
