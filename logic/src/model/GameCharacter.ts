@@ -16,11 +16,11 @@ export class GameCharacter
 
 	inventory: Inventory
 
-	maxGuts: number
-	maxWits: number
+	maxHealth: number
+	maxPoints: number
 
-	guts: number
-	wits: number
+	health: number
+	points: number
 
 	constructor() {
 		//
@@ -36,5 +36,4 @@ export class GameCharacter
 	): boolean {
 		throw new Error('Not implemented')
 	}
-
 }
