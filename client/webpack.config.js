@@ -81,7 +81,6 @@ module.exports = {
 					test: (module) => {
 						const context = module.context
 						const targets = [
-							'firebase',
 							'page',
 							'svelte',
 							'svelte-transitions',

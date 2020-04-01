@@ -1,5 +1,3 @@
-import 'firebase/auth';
-import 'firebase/database';
 export interface IApp {
 }
 export interface IAppOptions {
