@@ -1,5 +1,5 @@
 export interface IApp {
-
+t
 
 
 }
@@ -16,15 +16,14 @@ export interface IAppConstructor {
 
 }
 
-export async function bootstrap(
+export function bootstrap(
 	AppConstructor: IAppConstructor
 ) {
 	try {
 		const context = window as any
+		
 
-		context.app = new AppConstructor({
-			target: document.body
-		})
+		context.app = new AppConstructor({target: document.body})
 	} catch (e) {
 		console.error(e)
 	}
