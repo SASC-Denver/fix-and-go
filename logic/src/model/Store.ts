@@ -1,15 +1,24 @@
 /**
  * A place where a player can buy and sell things from.
  */
-import {IGameObject} from './game'
+import {
+	GameObjectType,
+	IGameObject
+} from './game'
+import {GameObject} from './GameObject'
 import {Inventory}   from './Inventory'
 
 /**
  * Store containing items that a player can buy or sell.
  */
-export class Store {
+export class Store
+	extends GameObject {
 
 	inventory: Inventory
+	
+	constructor() {
+		super(GameObjectType.STORE);
+	}
 
 	/**
 	 * Buy an item from a store.

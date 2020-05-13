@@ -1,28 +1,29 @@
 import {
 	GameObjectType,
-	IGameObject,
 	IObjectCoordinates
 }                  from './game'
+import {GameObject} from './GameObject'
 import {Inventory} from './Inventory'
 
 /**
  * Any game character, including Player or Boss
  */
 export class GameCharacter
-	implements IGameObject {
+	extends GameObject {
 
-	coordinates: IObjectCoordinates
-	type: GameObjectType
+	inventory: Inventory = new Inventory();
 
-	inventory: Inventory
+	health: number = 0;
+	points: number = 0;
 
-	maxHealth: number
-	maxPoints: number
-
-	health: number
-	points: number
-
-	constructor() {
+	constructor(
+		type: GameObjectType,
+		public maxHealth: number,
+		public maxPoints: number,
+	) {
+		super(type);
+		this.health = maxHealth;
+		this.points = maxPoints;
 		//
 	}
 
@@ -36,4 +37,5 @@ export class GameCharacter
 	): boolean {
 		throw new Error('Not implemented')
 	}
+
 }

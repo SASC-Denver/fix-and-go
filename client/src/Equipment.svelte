@@ -1,0 +1,34 @@
+<script>
+</script>
+<style>
+</style>
+<table>
+    <tr>
+        <td></td>
+        <td></td>
+        <td>H</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>W</td>
+        <td>A</td>
+        <td>B</td>
+        <td>T</td>
+        <td>H</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td>L</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td>F</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>

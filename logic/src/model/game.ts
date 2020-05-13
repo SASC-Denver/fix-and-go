@@ -1,8 +1,10 @@
 export enum GameObjectType {
 	BOSS,
 	ITEM,
-	MAIN_CHARACTER,
+	OBSTACLE,
 	PLAYER,
+	PORTAL,
+	STORE,
 }
 
 export interface IGameObject {

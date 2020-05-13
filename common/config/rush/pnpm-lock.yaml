@@ -11,6 +11,7 @@ dependencies:
   html-webpack-plugin: 3.2.0_webpack@4.42.1
   mini-css-extract-plugin: 0.5.0_webpack@4.42.1
   optimize-css-assets-webpack-plugin: 5.0.3_webpack@4.42.1
+  prettier: 2.0.5
   serve: 10.1.2
   style-loader: 0.23.1
   svelte-loader: 2.13.6
@@ -4797,6 +4798,13 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
+  /prettier/2.0.5:
+    dev: false
+    engines:
+      node: '>=10.13.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
   /pretty-error/2.1.1:
     dependencies:
       renderkid: 2.0.3
@@ -6605,26 +6613,29 @@ packages:
     version: 0.0.0
   'file:projects/logic.tgz':
     dependencies:
+      prettier: 2.0.5
       svelte: 3.20.1
       tslint: 5.20.1_typescript@3.8.3
       typescript: 3.8.3
     dev: false
     name: '@rush-temp/logic'
     resolution:
-      integrity: sha512-Ut7LGxvqZGdMyRkuOLPEbFESGofYkZINyJ7SCVlomIq0qgjC9EQKqK6uqPRRZjSYKv4HHkI7XDOBRPbS65z6vA==
+      integrity: sha512-pt8FDTV/W6Iwx9CefGWIRmLGS2cAFhOj5tkv5KqMenF1lXuFnTbiIx5ytUOQmm2mMYAzMCcsMTLsANszg9i5KQ==
       tarball: 'file:projects/logic.tgz'
     version: 0.0.0
   'file:projects/server.tgz':
     dependencies:
       fastify: 2.13.0
+      prettier: 2.0.5
       tslint: 5.20.1_typescript@3.8.3
       typescript: 3.8.3
     dev: false
     name: '@rush-temp/server'
     resolution:
-      integrity: sha512-MlDDRu94gHVlFtuPgFQm4P76IxfIvgFwowQd9D786bi/QsD+vaJVLUAqS67PsAHtViXeqLn3Qgt9ehgMx0IdEw==
+      integrity: sha512-HRY0rwJH5x/zTv2G9W+bsO9zQ5G/5EmlmqAf65neJVbD3mWdXHhQXGVmnWJucoPt/oL+GU1znKoDVisgS0tRBg==
       tarball: 'file:projects/server.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@rush-temp/client': 'file:./projects/client.tgz'
   '@rush-temp/logic': 'file:./projects/logic.tgz'
@@ -6638,6 +6649,7 @@ specifiers:
   html-webpack-plugin: ^3.2.x
   mini-css-extract-plugin: ^0.5.0
   optimize-css-assets-webpack-plugin: ^5.0.x
+  prettier: ^2.0.5
   serve: ^10.1.1
   style-loader: ^0.23.1
   svelte-loader: ^2.13.6

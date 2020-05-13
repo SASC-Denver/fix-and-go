@@ -1,4 +1,7 @@
 import {GameCharacter} from './GameCharacter'
+import {
+	GameObjectType
+}                  from './game'
 
 /**
  * Human player.
@@ -6,8 +9,11 @@ import {GameCharacter} from './GameCharacter'
 export class MainCharacter
 	extends GameCharacter {
 
-	constructor() {
-		super()
+	constructor(
+		maxHealth: number,
+		maxPoints: number,
+	) {
+		super(GameObjectType.PLAYER, maxHealth, maxPoints);
 	}
 
 }
