@@ -1,18 +1,13 @@
-import {
-	GameObjectType,
-}                  from './game'
-import {
-    GameObject
-} from './GameObject'
+import { GameObjectType } from "./game";
+import { GameObject, IGameObjectAttributes } from "./GameObject";
+
+export interface IPortalAttributes extends IGameObjectAttributes {}
 
 /**
  * Any game character, including Player or Boss
  */
-export class Portal
-	extends GameObject {
-
-	constructor() {
-		super(GameObjectType.PORTAL);
-	}
-
+export class Portal extends GameObject {
+  constructor(attributes: IPortalAttributes) {
+    super(GameObjectType.PORTAL, attributes);
+  }
 }

@@ -43,26 +43,37 @@
 
         switch (gameObject.type) {
             case GameObjectType.BOSS:
-                return 'Monstr';
+                return 'Boss' + getCoords(gameObject);
             case GameObjectType.ITEM:
-                return 'Item';
+                return 'Item' + getCoords(gameObject);
             case GameObjectType.OBSTACLE:
-                return '^^^^^^';
+                return '^^^^^^' + getCoords(gameObject);
             case GameObjectType.PLAYER:
-                return 'Player';
+                return 'Player' + getCoords(gameObject);
             case GameObjectType.PORTAL:
-                return 'Portal';
+                return 'Portal' + getCoords(gameObject);
             case GameObjectType.STORE:
-                return 'Store';
+                return 'Store' + getCoords(gameObject);
             default:
                 return '?????';
         }
+    }
+    
+    function getCoords(
+        gameObject
+    ) {
+        const coords = gameObject.coordinates;
+        
+        return '';
+        
+        // return ' X: ' + coords.x + ', Y: ' + coords.y;
     }
 
     function handleClick(
         viewX,
         viewY
     ) {
+        // console.log('viewX: ' + viewX + ', viewY: ' + viewY);
         let changeInY;
         switch (viewY) {
             case 4:
@@ -91,16 +102,18 @@
             default:
                 return;
         }
-
-        if (!changeInX && !changeInY) {
+        
+        if (changeInX === 0 && changeInY === 0) {
+            // That's where the Player is
             return;
         }
+        // console.log('changeInX: ' + changeInX + ', changeInY: ' + changeInY);
 
         let newX = player.coordinates.x + changeInX;
         let newY = player.coordinates.y + changeInY;
 
         if (testZone.moveObject(player, newX, newY)) {
-            console.log(JSON.stringify(player.coordinates));
+            // console.log(JSON.stringify(player.coordinates));
             changeCount++;
         }
     }
@@ -215,162 +228,14 @@
 </style>
 
 <table class="map">
-
     {#each mapView as mapViewRow, viewY}
     <tr>
         {#each mapViewRow as mapObject, viewX}
         <td on:click="{event => handleClick(viewX, viewY)}">
             {render(mapObject)}
+            <!--x{viewX}, y{viewY}-->
         </td>
         {/each}
     </tr>
     {/each}
-    <!--
-    <tr>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-        <td>---------</td>
-    </tr>
-    <tr>
-        <td>---------</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>
-            Zone
-            <br> Gate
-        </td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>---------</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Store</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>Player</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>---------</td>
-        <td>---------</td>
-        <td></td>
-        <td></td>
-        <td>Monstr</td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>---------</td>
-        <td>---------</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td>Item</td>
-        <td></td>
-        <td>---------</td>
-        <td>---------</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>---------</td>
-        <td>---------</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    -->
 </table>

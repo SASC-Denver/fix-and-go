@@ -2,8 +2,14 @@ import {
 	GameObjectType,
 }                  from './game'
 import {
-    GameObject
+    GameObject,
+    IGameObjectAttributes
 } from './GameObject'
+
+export interface IGameItemAttributes
+extends IGameObjectAttributes {
+	
+}
 
 /**
  * Any game character, including Player or Boss
@@ -11,8 +17,10 @@ import {
 export class GameItem
 	extends GameObject {
 
-	constructor() {
-		super(GameObjectType.ITEM);
+	constructor(
+		attributes: IGameItemAttributes
+		) {
+		super(GameObjectType.ITEM, attributes);
 	}
 
 }

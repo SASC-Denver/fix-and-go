@@ -4,7 +4,12 @@ import * as fastifyLib from 'fastify'
 const fastify = fastifyLib({logger: true})
 
 // Declare a route
-fastify.get('/', async (request, reply) => {
+fastify.get('/signin', async (request, reply) => {
+	return { hello: 'world' }
+})
+
+// Declare a route
+fastify.get('/move', async (request, reply) => {
 	return { hello: 'world' }
 })
 

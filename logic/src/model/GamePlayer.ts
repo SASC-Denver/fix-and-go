@@ -3,21 +3,20 @@ import {
 	GameObjectType
 }                  from './game'
 
-
-export interface IGameBossAttributes
+export interface IGamePlayerAttributes
 extends IGameCharacterAttributes {
 }
 
 /**
- * In game character.
+ * Human player.
  */
-export class GameBoss
+export class GamePlayer
 	extends GameCharacter {
 
 	constructor(
-		attributes: IGameBossAttributes
+		attributes: IGamePlayerAttributes
 	) {
-		super(GameObjectType.BOSS, attributes);
+		super(GameObjectType.PLAYER, attributes);
 	}
 
 }

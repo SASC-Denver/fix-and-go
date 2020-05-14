@@ -4,6 +4,10 @@ import {
 	IObjectCoordinates
 }                  from './game'
 
+export interface IGameObjectAttributes {
+	startCoords: IObjectCoordinates;
+}
+
 /**
  * Any game character, including Player or Boss
  */
@@ -16,8 +20,16 @@ export class GameObject
 	};
 
 	constructor(
-		public type: GameObjectType
+		public type: GameObjectType,
+		attributes: IGameObjectAttributes
 	) {
+		const startCoordinates = attributes.startCoords; 
+		if(startCoordinates !== null) {
+			this.coordinates = {
+				x: startCoordinates.x,
+				y: startCoordinates.y
+			};
+		}
 	}
 	
 }

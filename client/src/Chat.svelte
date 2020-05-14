@@ -18,7 +18,7 @@
 </style>
 
 <section class="messages">
-    Player1: Hello Player1.
-    <br> Player2: Hi Player2.
+    Player1: Hello Player2.
+    <br> Player2: Hi Player1.
 </section>
 <input class="message-input" type="text">
