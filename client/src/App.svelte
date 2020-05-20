@@ -45,7 +45,7 @@
     async function signIn() {
         let data
         try {
-            return await putData('http://localhost:8080/signIn', {
+            return await putData('api/signIn', {
                 username: 'Player' + Math.floor(Math.random() * Math.floor(1000))
             });
         } catch (e) {
@@ -60,7 +60,7 @@
     async function move(positionChange) {
         let data = null
         try {
-            data = await putData('http://localhost:8080/move', {
+            data = await putData('api/move', {
                 playerId: player.id,
                 positionChange
             });

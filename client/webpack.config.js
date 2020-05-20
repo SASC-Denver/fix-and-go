@@ -44,7 +44,13 @@ module.exports = {
 	devServer: {
 		host: '0.0.0.0',
 		// https://github.com/webpack/webpack-dev-server/issues/1604
-		disableHostCheck: true
+		disableHostCheck: true,
+    	proxy: {
+        	'/api': {
+            	target: 'http://localhost:8081',
+            	secure: false
+        	}
+	    }
 	},
 	entry: {
 		bundle: ['./src/main.js']

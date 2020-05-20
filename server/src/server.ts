@@ -17,12 +17,16 @@ fastify.register(require('fastify-cors'), {
 		origin,
 		cb
 	) => {
-		if (/localhost/.test(origin)) {
-			//  Request from localhost will pass
+		console.log('origin START:');
+		console.log(origin);
+		console.log('origin END');
+		if (/localhost/.test(origin) 
+		|| /86297555dce54909ab4c30f21c2e3db7.vfs.cloud9.us-east-2.amazonaws.com/.test(origin)) {
+			// Request from localhost or Cloud9 development server will pass 
 			cb(null, true)
 			return
 		}
-		cb(new Error('Not allowed'), false)
+		cb(new Error('Not allowed CORS host'), false)
 	}
 })
 
@@ -37,7 +41,15 @@ function initGame(): void {
 }
 
 // Declare a route
-fastify.put('/signIn', async (
+fastify.get('/api/hello', async (
+	request,
+	reply
+) => {
+	return {hello: 'world'};
+});
+
+// Declare a route
+fastify.put('/api/signIn', async (
 	request,
 	reply
 ) => {
@@ -79,7 +91,7 @@ fastify.put('/signIn', async (
 })
 
 // Declare a route
-fastify.put('/move', async (
+fastify.put('/api/move', async (
 	request,
 	reply
 ) => {
@@ -168,7 +180,7 @@ fastify.put('/move', async (
 // Run the server!
 const start = async () => {
 	try {
-		await fastify.listen(8080)
+		await fastify.listen(8081)
 		fastify.log.info(`server listening on ${(fastify.server as any).address().port}`)
 	} catch (err) {
 		fastify.log.error(err)
