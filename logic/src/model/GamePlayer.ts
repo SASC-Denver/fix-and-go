@@ -1,10 +1,13 @@
-import {GameCharacter, IGameCharacterAttributes} from './GameCharacter'
+import {GameObjectType} from './game'
 import {
-	GameObjectType
-}                  from './game'
+	GameCharacter,
+	IGameCharacterAttributes
+}                       from './GameCharacter'
 
 export interface IGamePlayerAttributes
-extends IGameCharacterAttributes {
+	extends IGameCharacterAttributes {
+	id: number
+	username: string
 }
 
 /**
@@ -13,10 +16,16 @@ extends IGameCharacterAttributes {
 export class GamePlayer
 	extends GameCharacter {
 
+	id: number
+	username: string
+
 	constructor(
 		attributes: IGamePlayerAttributes
 	) {
-		super(GameObjectType.PLAYER, attributes);
+		super(GameObjectType.PLAYER, attributes)
+
+		this.id = attributes.id
+		this.username = attributes.username
 	}
 
 }

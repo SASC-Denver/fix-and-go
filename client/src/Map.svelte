@@ -1,43 +1,29 @@
 <script>
     import {
-        Game,
-        GameBoss,
-        GameItem,
         GameObjectType,
-        MainCharacter,
-        Obstacle,
-        Portal,
-        Store,
-        Zone
-    }
-    from '@fix-and-go/logic'
-    import {
-        onDestroy,
-        onMount
-    }
-    from 'svelte'
+    } from '@fix-and-go/logic'
+    import {createEventDispatcher, onDestroy, onMount} from 'svelte'
 
-    var testZone;
+    const dispatch = createEventDispatcher();
 
-    var player;
+    export let changeCount = 0;
+    export let player;
+    export let zone;
 
-    var changeCount = 0;
-
-    $: mapView = getMapView(testZone, player, changeCount);
+    $: mapView = getMapView(zone, player, changeCount);
 
     onMount(() => {
-        createTestZone();
     });
 
-    onDestroy(() => {});
+    onDestroy(() => {
+    });
 
     function render(
         gameObject
     ) {
         if (gameObject === undefined) {
             return '---------';
-        }
-        else if (gameObject === null) {
+        } else if (gameObject === null) {
             return '';
         }
 
@@ -58,14 +44,13 @@
                 return '?????';
         }
     }
-    
+
     function getCoords(
         gameObject
     ) {
-        const coords = gameObject.coordinates;
-        
         return '';
-        
+
+        // const coords = gameObject.coordinates;
         // return ' X: ' + coords.x + ', Y: ' + coords.y;
     }
 
@@ -102,7 +87,7 @@
             default:
                 return;
         }
-        
+
         if (changeInX === 0 && changeInY === 0) {
             // That's where the Player is
             return;
@@ -112,57 +97,14 @@
         let newX = player.coordinates.x + changeInX;
         let newY = player.coordinates.y + changeInY;
 
-        if (testZone.moveObject(player, newX, newY)) {
-            // console.log(JSON.stringify(player.coordinates));
-            changeCount++;
+        if (zone.isMoveWithinDimensions(newX, newY)) {
+            dispatch('move', {
+                positionChange: {
+                    x: changeInX,
+                    y: changeInY
+                }
+            })
         }
-    }
-
-    function createTestZone() {
-        testZone = new Zone(15, 15);
-
-        player = new MainCharacter(15, 10);
-
-        const boss = new GameBoss(10, 10);
-
-        const item = new GameItem();
-
-        const store = new Store();
-
-        const portal = new Portal();
-
-        const obstacle1 = new Obstacle();
-        const obstacle2 = new Obstacle();
-        const obstacle3 = new Obstacle();
-        const obstacle4 = new Obstacle();
-        const obstacle5 = new Obstacle();
-        const obstacle6 = new Obstacle();
-        const obstacle7 = new Obstacle();
-        const obstacle8 = new Obstacle();
-        const obstacle9 = new Obstacle();
-        const obstacle10 = new Obstacle();
-        const obstacle11 = new Obstacle();
-        const obstacle12 = new Obstacle();
-        const obstacle13 = new Obstacle();
-
-        testZone.add(player, 5, 4);
-        testZone.add(boss, 7, 6);
-        testZone.add(item, 1, 8);
-        testZone.add(store, 0, 4);
-        testZone.add(portal, 5, 0);
-        testZone.add(obstacle1, 0, 0);
-        testZone.add(obstacle2, 10, 0);
-        testZone.add(obstacle3, 4, 6);
-        testZone.add(obstacle4, 3, 6);
-        testZone.add(obstacle5, 4, 7);
-        testZone.add(obstacle6, 3, 7);
-        testZone.add(obstacle7, 4, 8);
-        testZone.add(obstacle8, 3, 8);
-        testZone.add(obstacle9, 4, 9);
-        testZone.add(obstacle10, 3, 9);
-        testZone.add(obstacle11, 0, 14);
-        testZone.add(obstacle12, 14, 0);
-        testZone.add(obstacle13, 14, 14);
     }
 
     function getMapView(
@@ -206,8 +148,7 @@
                     }
 
                     view[viewY][viewX] = zone.objectLayout[y][x];
-                }
-                finally {
+                } finally {
                     viewX++;
                 }
             }

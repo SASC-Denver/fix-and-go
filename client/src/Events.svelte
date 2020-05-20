@@ -1,4 +1,27 @@
 <script>
+    import {onDestroy, onMount} from 'svelte'
+    import {lastMessage} from "./ui-state";
+
+    let gameEventsElement;
+
+    const messageSubscription = lastMessage.subscribe(message => {
+        if(message === null) {
+            return
+        }
+        const messageElement = document.createElement('div');
+        messageElement.innerText = message.value;
+        gameEventsElement.appendChild(messageElement);
+        // gameEventsElement.appendChild(document.createElement('br'));
+    });
+
+
+    onMount(() => {
+        gameEventsElement = document.getElementById('gameEvents');
+    });
+
+    onDestroy(() => {
+        messageSubscription.unsubscribe();
+    });
 </script>
 <style>
     .events {
@@ -8,14 +31,5 @@
     }
 </style>
 
-<section class="events">
-    You entered Zone 1.
-    <br> A monster attacked you!
-    <br> Monster hit you for 10 points.
-    <br> You hit the monster for 12 points.
-    <br> Monster hit you for 9 points.
-    <br> You hit the monster for 10 points.
-    <br> Monster hit you for 7 points.
-    <br> You hit the monster for 11 points.
-    <br> You won!
+<section id="gameEvents" class="events">
 </section>

@@ -1,13 +1,19 @@
-import { GameObjectType } from "./game";
-import { GameObject, IGameObjectAttributes } from "./GameObject";
+import {GameObjectType} from './game'
+import {
+	GameObject,
+	IGameObjectAttributes
+}                       from './GameObject'
 
-export interface IObstacleAttributes extends IGameObjectAttributes {}
+export interface IObstacleAttributes
+	extends IGameObjectAttributes {
+}
 
 /**
  * Any game character, including Player or Boss
  */
-export class Obstacle extends GameObject {
-  constructor(attributes: IObstacleAttributes) {
-    super(GameObjectType.OBSTACLE, attributes);
-  }
+export class Obstacle
+	extends GameObject {
+	constructor(attributes: IObstacleAttributes) {
+		super(GameObjectType.OBSTACLE, attributes)
+	}
 }

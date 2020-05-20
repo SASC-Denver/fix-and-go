@@ -8,10 +8,10 @@ dependencies:
   css-loader: 2.1.1_webpack@4.42.1
   eslint: 5.16.0
   fastify: 2.13.0
+  fastify-cors: 3.0.3
   html-webpack-plugin: 3.2.0_webpack@4.42.1
   mini-css-extract-plugin: 0.5.0_webpack@4.42.1
   optimize-css-assets-webpack-plugin: 5.0.3_webpack@4.42.1
-  prettier: 2.0.5
   serve: 10.1.2
   style-loader: 0.23.1
   svelte-loader: 2.13.6
@@ -2189,6 +2189,19 @@ packages:
     dev: false
     resolution:
       integrity: sha1-9K8+qfNNiicc9YrSs3WfQx8LMY0=
+  /fastify-cors/3.0.3:
+    dependencies:
+      fastify-plugin: 1.6.1
+      vary: 1.1.2
+    dev: false
+    resolution:
+      integrity: sha512-SDMa+GtyTTAU7pWZwY4fukb/VwCZ4c30p0oEaE7/d/+VCvceB1+NzW2udp2dSZZfWR7J1kUookCpw2dLmtAsSw==
+  /fastify-plugin/1.6.1:
+    dependencies:
+      semver: 6.3.0
+    dev: false
+    resolution:
+      integrity: sha512-APBcb27s+MjaBIerFirYmBLatoPCgmHZM6XP0K+nDL9k0yX8NJPWDY1RAC3bh6z+AB5ULS2j31BUfLMT3uaZ4A==
   /fastify/2.13.0:
     dependencies:
       abstract-logging: 2.0.0
@@ -6608,7 +6621,7 @@ packages:
     dev: false
     name: '@rush-temp/client'
     resolution:
-      integrity: sha512-l173tShnYBGJh9Sl5mBqHlr13GW9IWJo8o3DI+yxtxi5NkMv8z3Ck1EXTmQLPL10dyodPq03cU3hnF4tgYcmZw==
+      integrity: sha512-U7+mhRYRPOMAwpnKXjipJ1cDK+pq1JLN+XDRVMUthYz0KjksPVMeRa0I3/z0REO83oUlHK2ejZusjkBP63usFw==
       tarball: 'file:projects/client.tgz'
     version: 0.0.0
   'file:projects/logic.tgz':
@@ -6620,19 +6633,20 @@ packages:
     dev: false
     name: '@rush-temp/logic'
     resolution:
-      integrity: sha512-pt8FDTV/W6Iwx9CefGWIRmLGS2cAFhOj5tkv5KqMenF1lXuFnTbiIx5ytUOQmm2mMYAzMCcsMTLsANszg9i5KQ==
+      integrity: sha512-594AL27QtYTvOrq1HU0n65WzfGaM3VejmqIqiB5ka00I0yM0791rnYpcHGr7IuYFb0k6dl1xnKI1MIdiDDzvAg==
       tarball: 'file:projects/logic.tgz'
     version: 0.0.0
   'file:projects/server.tgz':
     dependencies:
       fastify: 2.13.0
+      fastify-cors: 3.0.3
       prettier: 2.0.5
       tslint: 5.20.1_typescript@3.8.3
       typescript: 3.8.3
     dev: false
     name: '@rush-temp/server'
     resolution:
-      integrity: sha512-HRY0rwJH5x/zTv2G9W+bsO9zQ5G/5EmlmqAf65neJVbD3mWdXHhQXGVmnWJucoPt/oL+GU1znKoDVisgS0tRBg==
+      integrity: sha512-215j9h3wkoHyg7IJNAmF3N82RpX5toosPnwL3gEltDn/TxofcL7nBC9nBipy+xqR0IAZXg8qZC7b4KU3uzdsdw==
       tarball: 'file:projects/server.tgz'
     version: 0.0.0
 registry: ''
@@ -6646,10 +6660,10 @@ specifiers:
   css-loader: ^2.0.2
   eslint: ^5.14.1
   fastify: ^2.12.1
+  fastify-cors: ^3.0.3
   html-webpack-plugin: ^3.2.x
   mini-css-extract-plugin: ^0.5.0
   optimize-css-assets-webpack-plugin: ^5.0.x
-  prettier: ^2.0.5
   serve: ^10.1.1
   style-loader: ^0.23.1
   svelte-loader: ^2.13.6

@@ -1,4 +1,5 @@
 export * from './game-state/Zone';
+export * from './model/network/data';
 export * from './model/game';
 export * from './model/GameBoss';
 export * from './model/GameCharacter';
@@ -9,3 +10,4 @@ export * from './model/Inventory';
 export * from './model/Obstacle';
 export * from './model/Portal';
 export * from './model/Store';
+export * from './zones/TestZone';
