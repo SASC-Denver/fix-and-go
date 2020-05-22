@@ -2,97 +2,97 @@ import {IZoneAttributes} from '../game-state/Zone'
 
 export const testZoneAttributes: IZoneAttributes = {
 	bosses: [{
-		maxHealth: 10,
-		maxMagic: 10,
-		startCoords: {
+		coordinates: {
 			x: 7,
 			y: 6,
-		}
+		},
+		maxHealth: 10,
+		maxMagic: 10,
 	}],
 	dimensions: {
 		x: 15,
 		y: 15,
 	},
 	items: [{
-		startCoords: {
+		coordinates: {
 			x: 1,
 			y: 8,
 		}
 	}],
 	obstacles: [{
-		startCoords: {
+		coordinates: {
 			x: 0,
 			y: 0,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 10,
 			y: 0,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 4,
 			y: 6,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 3,
 			y: 6,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 4,
 			y: 7,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 3,
 			y: 7,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 4,
 			y: 8,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 3,
 			y: 8,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 4,
 			y: 9,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 3,
 			y: 9,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 0,
 			y: 14,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 14,
 			y: 0,
 		}
 	}, {
-		startCoords: {
+		coordinates: {
 			x: 14,
 			y: 14,
 		}
 	}],
 	portals: [{
-		startCoords: {
+		coordinates: {
 			x: 5,
 			y: 0,
 		}
 	}],
 	stores: [{
-		startCoords: {
+		coordinates: {
 			x: 0,
 			y: 4,
 		}

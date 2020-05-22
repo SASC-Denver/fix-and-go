@@ -1,5 +1,5 @@
 <script>
-    import {GamePlayer, testZoneAttributes, Zone} from '@fix-and-go/logic'
+    import {ErrorCode, GamePlayer, Zone, ZoneUpdateType} from '@fix-and-go/logic'
     import {onDestroy, onMount} from 'svelte'
     import Chat from './Chat.svelte'
     import Equipment from './Equipment.svelte'
@@ -16,11 +16,12 @@
     let player
 
     onMount(async () => {
-        testZone = new Zone(testZoneAttributes);
+        testZone = new Zone();
         signIn().then(playerAttributes => {
-            if(!playerAttributes) {
+            if (!playerAttributes) {
                 return;
             }
+            updateFromServer().then()
             player = new GamePlayer(playerAttributes);
             testZone.add(player);
         })
@@ -61,7 +62,7 @@
         let data = null
         try {
             data = await putData('api/move', {
-                playerId: player.id,
+                playerId: player.attributes.id,
                 positionChange
             });
         } catch (e) {
@@ -72,14 +73,60 @@
             return;
         }
         if (data.error) {
+            switch(data.error.code) {
+                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
+                    // No message needed?
+                    return;
+            }
             lastMessage.set({
                 eventId: ++eventCount,
                 value: data.error.description
             });
-            return;
         }
-        testZone.moveObject(player, data.newCoords.x, data.newCoords.y, false);
-        changeCount++;
+    }
+
+    async function updateFromServer() {
+        let timestamp = new Date().getTime()
+        const secondsBeforeUpdate = Math.floor(timestamp / 1000)
+
+        await getUpdates()
+
+        timestamp = new Date().getTime()
+        const secondsAfterUpdate = Math.floor(timestamp / 1000)
+        if (secondsAfterUpdate > secondsBeforeUpdate) {
+            await updateFromServer()
+        } else {
+            const milliSecondsAfterUpdate = timestamp % 1000
+            setTimeout(async _ => {
+                await updateFromServer()
+            }, 1000 - milliSecondsAfterUpdate + 1)
+        }
+    }
+
+    async function getUpdates() {
+        let data
+        try {
+            data = await getData('api/updates?playerId=' + player.attributes.id);
+            testZone.updateObjects(data.dimensions,
+                data.updates
+                    .filter(update => update.type === ZoneUpdateType.ZONE)
+                    .map(update => update.object),
+                player)
+            changeCount++
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+        }
+    }
+
+    async function getData(url) {
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+        });
+        return response.json();
     }
 
     async function putData(url, data) {

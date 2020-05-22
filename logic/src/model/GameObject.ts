@@ -2,10 +2,12 @@ import {
 	GameObjectType,
 	IGameObject,
 	IObjectCoordinates
-}                  from './game'
+} from './game'
 
 export interface IGameObjectAttributes {
-	startCoords: IObjectCoordinates;
+	coordinates: IObjectCoordinates;
+	id?: number;
+	type?: GameObjectType;
 }
 
 /**
@@ -14,22 +16,11 @@ export interface IGameObjectAttributes {
 export class GameObject
 	implements IGameObject {
 
-	coordinates: IObjectCoordinates = {
-		x: -1,
-		y: -1
-	};
-
 	constructor(
-		public type: GameObjectType,
-		attributes: IGameObjectAttributes
+		type: GameObjectType,
+		public attributes: IGameObjectAttributes
 	) {
-		const startCoordinates = attributes.startCoords; 
-		if(startCoordinates !== null) {
-			this.coordinates = {
-				x: startCoordinates.x,
-				y: startCoordinates.y
-			};
-		}
+		attributes.type = type;
 	}
-	
+
 }

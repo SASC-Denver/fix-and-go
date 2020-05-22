@@ -27,7 +27,7 @@
             return '';
         }
 
-        switch (gameObject.type) {
+        switch (gameObject.attributes.type) {
             case GameObjectType.BOSS:
                 return 'Boss' + getCoords(gameObject);
             case GameObjectType.ITEM:
@@ -94,8 +94,8 @@
         }
         // console.log('changeInX: ' + changeInX + ', changeInY: ' + changeInY);
 
-        let newX = player.coordinates.x + changeInX;
-        let newY = player.coordinates.y + changeInY;
+        let newX = player.attributes.coordinates.x + changeInX;
+        let newY = player.attributes.coordinates.y + changeInY;
 
         if (zone.isMoveWithinDimensions(newX, newY)) {
             dispatch('move', {
@@ -119,7 +119,7 @@
         if (!zone || !player) {
             return view;
         }
-        const coordinates = player.coordinates;
+        const coordinates = player.attributes.coordinates;
 
         const leftBorder = coordinates.x - 5;
         const rightBorder = coordinates.x + 5;

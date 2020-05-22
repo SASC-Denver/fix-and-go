@@ -27,6 +27,7 @@
     .events {
         border: 1px solid black;
         height: 260px;
+        overflow-y: scroll;
         width: 293px;
     }
 </style>

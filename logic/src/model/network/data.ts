@@ -1,7 +1,8 @@
 import {IGamePlayerAttributes} from '../GamePlayer'
 
 export enum ErrorCode {
-	INVALID_REQUEST
+	INVALID_REQUEST,
+	REQUESTING_TOO_FREQUENTLY
 }
 
 export interface IRequest {

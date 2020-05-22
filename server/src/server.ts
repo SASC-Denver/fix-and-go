@@ -5,23 +5,23 @@ import {
 	IGamePlayerAttributes,
 	IMoveRequest,
 	ISignInRequest,
+	IZoneUpdate,
+	IZoneUpdates,
 	testZoneAttributes,
-	Zone
-} from '@fix-and-go/logic'
+	Zone,
+	ZoneUpdateType
+}                      from '@fix-and-go/logic'
 import * as fastifyLib from 'fastify'
 
-const fastify = fastifyLib({logger: true})
+const fastify = fastifyLib({logger: false})
 
 fastify.register(require('fastify-cors'), {
 	origin: (
 		origin,
 		cb
 	) => {
-		console.log('origin START:');
-		console.log(origin);
-		console.log('origin END');
-		if (/localhost/.test(origin) 
-		|| /86297555dce54909ab4c30f21c2e3db7.vfs.cloud9.us-east-2.amazonaws.com/.test(origin)) {
+		if (!origin || /localhost/.test(origin) ||
+			/86297555dce54909ab4c30f21c2e3db7.vfs.cloud9.us-east-2.amazonaws.com/.test(origin)) {
 			// Request from localhost or Cloud9 development server will pass 
 			cb(null, true)
 			return
@@ -30,14 +30,21 @@ fastify.register(require('fastify-cors'), {
 	}
 })
 
-const players: GamePlayer[] = []
+const players: {
+	[id: number]: GamePlayer
+} = {}
 
-let testZone
+let testZone: Zone
+
+let updates: IZoneUpdates
+
+let currentSecond = 0
 
 initGame()
 
 function initGame(): void {
-	testZone = new Zone(testZoneAttributes)
+	testZone = new Zone()
+	testZone.initFromAttributes(testZoneAttributes)
 }
 
 // Declare a route
@@ -45,8 +52,8 @@ fastify.get('/api/hello', async (
 	request,
 	reply
 ) => {
-	return {hello: 'world'};
-});
+	return {hello: 'world'}
+})
 
 // Declare a route
 fastify.put('/api/signIn', async (
@@ -55,29 +62,27 @@ fastify.put('/api/signIn', async (
 ) => {
 	const signInRequest: ISignInRequest = request.body
 
-	const id = players.length
-
+	const id                                      = ++Zone.lastObjectId
 	const playerAttributes: IGamePlayerAttributes = {
-		id,
-		maxHealth: 15,
-		maxMagic: 10,
-		startCoords: {
+		coordinates: {
 			x: 5,
 			y: 4,
 		},
+		id,
+		maxHealth: 15,
+		maxMagic: 10,
 		username: signInRequest.username
 	}
 
 	const newPlayer = new GamePlayer(playerAttributes)
 
-	players.push(newPlayer)
+	console.log('New player id: ' + id)
+	players[id] = newPlayer
 
 	ADD_PLAYER_TO_ZONE:
-		for (let x = playerAttributes.startCoords.x; x < testZone.dimensions.x; x++) {
-			for (let y = playerAttributes.startCoords.y; y < testZone.dimensions.y; y++) {
-				playerAttributes.startCoords.x = x
-				playerAttributes.startCoords.y = y
-				newPlayer.coordinates          = {
+		for (let x = playerAttributes.coordinates.x; x < testZone.dimensions.x; x++) {
+			for (let y = playerAttributes.coordinates.y; y < testZone.dimensions.y; y++) {
+				playerAttributes.coordinates = {
 					x,
 					y
 				}
@@ -96,6 +101,7 @@ fastify.put('/api/move', async (
 	reply
 ) => {
 	const data: IMoveRequest = request.body
+	// console.log(data)
 
 	if (typeof data !== 'object') {
 		return {
@@ -105,14 +111,24 @@ fastify.put('/api/move', async (
 			}
 		}
 	}
+	// console.log('data.playerId: ' + data.playerId + ', ' + (typeof data.playerId !== 'number'))
 
 	if (typeof data.playerId !== 'number'
-		|| data.playerId < 0
-		|| data.playerId >= players.length) {
+		|| !players[data.playerId]) {
 		return {
 			error: {
 				code: ErrorCode.INVALID_REQUEST,
 				description: 'Invalid player Id'
+			}
+		}
+	}
+
+	const player = players[data.playerId]
+	if (player.lastSecondOf.move === currentSecond) {
+		return {
+			error: {
+				code: ErrorCode.REQUESTING_TOO_FREQUENTLY,
+				description: 'Moving too quickly'
 			}
 		}
 	}
@@ -159,9 +175,8 @@ fastify.put('/api/move', async (
 		}
 	}
 
-	const player = players[data.playerId]
-	const newX   = player.coordinates.x + changeInX
-	const newY   = player.coordinates.y + changeInY
+	const newX = player.attributes.coordinates.x + changeInX
+	const newY = player.attributes.coordinates.y + changeInY
 
 	if (!testZone.moveObject(player, newX, newY)) {
 		return {
@@ -172,8 +187,33 @@ fastify.put('/api/move', async (
 		}
 	}
 
+	player.lastSecondOf.move = currentSecond
+
 	return {
-		newCoords: player.coordinates
+		newCoords: player.attributes.coordinates
+	}
+})
+
+// Declare a route
+fastify.get('/api/updates', async (
+	request,
+	reply
+) => {
+	const playerId         = parseInt(request.query.playerId)
+	// tslint:disable-next-line:use-isnan
+	if (playerId === NaN) {
+		return {
+			error: {
+				code: ErrorCode.INVALID_REQUEST,
+				description: 'playerId is not a number'
+			}
+		}
+	}
+	// console.log('playerId: ' + playerId)
+	const updatesForPlayer = updates[playerId]
+	return {
+		dimensions: testZone.dimensions,
+		updates: updatesForPlayer ? updatesForPlayer : []
 	}
 })
 
@@ -182,9 +222,56 @@ const start = async () => {
 	try {
 		await fastify.listen(8081)
 		fastify.log.info(`server listening on ${(fastify.server as any).address().port}`)
+		trackTime()
 	} catch (err) {
 		fastify.log.error(err)
 		process.exit(1)
 	}
 }
 start()
+
+function trackTime() {
+	updates = {}
+	for (const playerId in players) {
+		const player                       = players[playerId]
+		player.visionRange                 = {
+			high: {
+				x: player.attributes.coordinates.x + 5,
+				y: player.attributes.coordinates.y + 5
+			},
+			low: {
+				x: player.attributes.coordinates.x - 5,
+				y: player.attributes.coordinates.y - 5
+			}
+		}
+		// console.log(player.visionRange)
+		const playerUpdates: IZoneUpdate[] = []
+		updates[player.attributes.id]      = playerUpdates
+		for (const objectType in testZone.objectsDirectory) {
+			// console.log('objectType:' + objectType)
+			const directoryForType = testZone.objectsDirectory[objectType]
+			for (const id in directoryForType) {
+				const object      = directoryForType[id]
+				const coordinates = object.attributes.coordinates
+				// console.log('id:' + id + ', x: ' + coordinates.x + ', y: ' + coordinates.y)
+				if (coordinates.x >= player.visionRange.low.x
+					&& coordinates.x <= player.visionRange.high.x
+					&& coordinates.y >= player.visionRange.low.y
+					&& coordinates.y <= player.visionRange.high.y) {
+					// console.log('in range')
+					const zoneLocationUpdate: IZoneUpdate = {
+						object: object.attributes,
+						type: ZoneUpdateType.ZONE
+					}
+
+					playerUpdates.push(zoneLocationUpdate)
+				}
+			}
+		}
+	}
+
+	const currentMillisecond = new Date().getTime()
+	currentSecond            = Math.floor(currentMillisecond / 1000)
+	const secondRemainder    = new Date().getTime() % 1000
+	setTimeout(trackTime, 1000 - secondRemainder)
+}

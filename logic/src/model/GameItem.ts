@@ -1,14 +1,12 @@
+import {GameObjectType} from './game'
 import {
-	GameObjectType,
-}                  from './game'
-import {
-    GameObject,
-    IGameObjectAttributes
-} from './GameObject'
+	GameObject,
+	IGameObjectAttributes
+}                       from './GameObject'
 
 export interface IGameItemAttributes
-extends IGameObjectAttributes {
-	
+	extends IGameObjectAttributes {
+	type?: GameObjectType.ITEM
 }
 
 /**
@@ -17,10 +15,12 @@ extends IGameObjectAttributes {
 export class GameItem
 	extends GameObject {
 
+	attributes: IGameItemAttributes
+
 	constructor(
-		attributes: IGameItemAttributes
-		) {
-		super(GameObjectType.ITEM, attributes);
+		attributes: IGameItemAttributes,
+	) {
+		super(GameObjectType.ITEM, attributes)
 	}
 
 }

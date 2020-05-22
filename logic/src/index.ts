@@ -1,5 +1,6 @@
 export * from './game-state/Zone';
 export * from './model/network/data';
+export * from './model/network/updates';
 export * from './model/game';
 export * from './model/GameBoss';
 export * from './model/GameCharacter';

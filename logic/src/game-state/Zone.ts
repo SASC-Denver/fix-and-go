@@ -1,28 +1,34 @@
 import {
+	GameObjectType,
 	IGameObject,
 	IObjectCoordinates,
-	IObjectDirectoryById,
-}                            from '../model/game'
+	IObjectDirectory
+}                              from '../model/game'
 import {
 	GameBoss,
 	IGameBossAttributes
-}                            from '../model/GameBoss'
+}                              from '../model/GameBoss'
 import {
 	GameItem,
 	IGameItemAttributes
-} from '../model/GameItem'
+}                              from '../model/GameItem'
+import {IGameObjectAttributes} from '../model/GameObject'
+import {
+	GamePlayer,
+	IGamePlayerAttributes
+}                              from '../model/GamePlayer'
 import {
 	IObstacleAttributes,
 	Obstacle
-}                            from '../model/Obstacle'
+}                              from '../model/Obstacle'
 import {
 	IPortalAttributes,
 	Portal
-}                            from '../model/Portal'
+}                              from '../model/Portal'
 import {
 	IStoreAttributes,
 	Store
-}                            from '../model/Store'
+}                              from '../model/Store'
 
 export interface IZoneDimensions {
 	x: number;
@@ -43,18 +49,21 @@ export interface IZoneAttributes {
 	zones between which players move.
  */
 export class Zone {
+
+	static lastObjectId = 0
+
+	dimensions: IZoneDimensions
+
+	/*
+	Directory (map) of all objects by ObjectType and Id
+	 */
+	objectsDirectory: IObjectDirectory = {}
+
 	/*
 	Two dimensional array of references to objects in the zone,
 	with array indexes being the X and Y coordinates.
 	 */
 	objectLayout: IGameObject[][] = []
-
-	/*
-	Directory (map) of all objects by ObjectType and Id
-	 */
-	private objectsDirectory: IObjectDirectoryById = {}
-
-	private dimensions: IZoneDimensions
 
 	/**
 	 * Zones are rectangles with coordinates from 0 to endX and 0 to endY
@@ -62,50 +71,105 @@ export class Zone {
 	 * @param endX - end X coordinate
 	 * @param endY - end Y coordinate
 	 */
-	constructor(
+	constructor() {
+		// Nothing to initialize, yet
+	}
+
+	initFromAttributes(
 		attributes: IZoneAttributes
-	) {
+	): void {
 		this.dimensions = {
 			x: attributes.dimensions.x,
 			y: attributes.dimensions.y
 		}
-
-		for (let y = 0; y < this.dimensions.y; y++) {
-			this.objectLayout[y] = []
-			for (let x = 0; x < this.dimensions.x; x++) {
-				this.objectLayout[y][x] = null
-			}
-		}
+		this.initObjectLayout()
 
 		if (attributes.bosses) {
 			for (let i = 0; i < attributes.bosses.length; i++) {
-				this.add(new GameBoss(attributes.bosses[i]))
+				const bossAttributes = attributes.bosses[i]
+				bossAttributes.id    = ++Zone.lastObjectId
+				this.add(new GameBoss(bossAttributes))
 			}
 		}
 
 		if (attributes.items) {
 			for (let i = 0; i < attributes.items.length; i++) {
-				this.add(new GameItem(attributes.items[i]))
+				const itemAttributes = attributes.items[i]
+				itemAttributes.id    = ++Zone.lastObjectId
+				this.add(new GameItem(itemAttributes))
 			}
 		}
 
 		if (attributes.obstacles) {
 			attributes.obstacles.forEach((obstacleAttributes: IObstacleAttributes) => {
+				obstacleAttributes.id = ++Zone.lastObjectId
 				this.add(new Obstacle(obstacleAttributes))
 			})
 		}
 
 		if (attributes.portals) {
 			attributes.portals.forEach((portalAttributes) => {
+				portalAttributes.id = ++Zone.lastObjectId
 				this.add(new Portal(portalAttributes))
 			})
 		}
 
 		if (attributes.stores) {
 			attributes.stores.forEach(storesAttributes => {
+				storesAttributes.id = ++Zone.lastObjectId
 				this.add(new Store(storesAttributes))
 			})
 		}
+	}
+
+	initObjectLayout(): void {
+		this.objectLayout = []
+		for (let y = 0; y < this.dimensions.y; y++) {
+			this.objectLayout[y] = []
+			for (let x = 0; x < this.dimensions.x; x++) {
+				this.objectLayout[y][x] = null
+			}
+		}
+	}
+
+	updateObjects(
+		dimensions: IZoneDimensions,
+		attributesList: IGameObjectAttributes[],
+		player: GamePlayer,
+	): void {
+		this.dimensions       = dimensions
+		this.objectsDirectory = {}
+		this.initObjectLayout()
+
+		attributesList.forEach(attributes => {
+			switch (attributes.type) {
+				case GameObjectType.BOSS:
+					this.add(new GameBoss(attributes as IGameBossAttributes))
+					break
+				case GameObjectType.ITEM:
+					this.add(new GameItem(attributes as IGameItemAttributes))
+					break
+				case GameObjectType.OBSTACLE:
+					this.add(new Obstacle(attributes as IObstacleAttributes))
+					break
+				case GameObjectType.PLAYER:
+					let newPlayer: GamePlayer
+					if (player && player.attributes.id === attributes.id) {
+						player.attributes = attributes as IGamePlayerAttributes
+						newPlayer         = player
+					} else {
+						newPlayer = new GamePlayer(attributes as IGamePlayerAttributes)
+					}
+					this.add(newPlayer)
+					break
+				case GameObjectType.PORTAL:
+					this.add(new Portal(attributes as IPortalAttributes))
+					break
+				case GameObjectType.STORE:
+					this.add(new Store(attributes as IStoreAttributes))
+					break
+			}
+		})
 	}
 
 	/**
@@ -120,11 +184,19 @@ export class Zone {
 	add(
 		object: IGameObject
 	): boolean {
-		const coordinates = object.coordinates
+		const coordinates = object.attributes.coordinates
 		if (!object || this.objectLayout[coordinates.y][coordinates.x]) {
 			return false
 		}
 		this.objectLayout[coordinates.y][coordinates.x] = object
+
+		let directoryForType = this.objectsDirectory[object.attributes.type]
+		if (!directoryForType) {
+			directoryForType                              = {}
+			this.objectsDirectory[object.attributes.type] = directoryForType
+		}
+
+		directoryForType[object.attributes.id] = object
 
 		return true
 	}
@@ -186,26 +258,25 @@ export class Zone {
 	moveObject(
 		object: IGameObject,
 		newX: number,
-		newY: number,
-		checkNewCell = true
+		newY: number
 	): boolean {
 		if (!this.isMoveWithinDimensions(newX, newY)) {
 			return false
 		}
 
-		if (checkNewCell && this.objectLayout[newY][newX]) {
+		if (this.objectLayout[newY][newX]) {
 			return false
 		}
 
-		if (this.objectLayout[object.coordinates.y][object.coordinates.x]
+		if (this.objectLayout[object.attributes.coordinates.y][object.attributes.coordinates.x]
 			!== object) {
 			return false
 		}
 
-		this.objectLayout[object.coordinates.y][object.coordinates.x] = null
-		this.objectLayout[newY][newX]                                 = object
+		this.objectLayout[object.attributes.coordinates.y][object.attributes.coordinates.x] = null
+		this.objectLayout[newY][newX]                                                       = object
 
-		object.coordinates = {
+		object.attributes.coordinates = {
 			x: newX,
 			y: newY,
 		}

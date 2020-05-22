@@ -6,6 +6,7 @@ import {
 
 export interface IObstacleAttributes
 	extends IGameObjectAttributes {
+	type?: GameObjectType.OBSTACLE
 }
 
 /**
@@ -13,7 +14,12 @@ export interface IObstacleAttributes
  */
 export class Obstacle
 	extends GameObject {
-	constructor(attributes: IObstacleAttributes) {
+
+	attributes: IObstacleAttributes
+
+	constructor(
+		attributes: IObstacleAttributes,
+	) {
 		super(GameObjectType.OBSTACLE, attributes)
 	}
 }

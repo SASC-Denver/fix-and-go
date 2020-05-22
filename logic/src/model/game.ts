@@ -1,3 +1,5 @@
+import {IGameObjectAttributes} from './GameObject'
+
 export enum GameObjectType {
 	BOSS,
 	ITEM,
@@ -9,8 +11,7 @@ export enum GameObjectType {
 
 export interface IGameObject {
 
-	coordinates: IObjectCoordinates
-	type: GameObjectType
+	attributes: IGameObjectAttributes
 
 }
 
@@ -18,6 +19,12 @@ export interface IObjectCoordinates {
 
 	x: number
 	y: number
+
+}
+
+export interface IObjectDirectory {
+
+	[type: number]: IObjectDirectoryById
 
 }
 

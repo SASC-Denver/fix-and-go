@@ -6,7 +6,7 @@ import {
 
 export interface IGamePlayerAttributes
 	extends IGameCharacterAttributes {
-	id: number
+	type?: GameObjectType.PLAYER
 	username: string
 }
 
@@ -16,16 +16,18 @@ export interface IGamePlayerAttributes
 export class GamePlayer
 	extends GameCharacter {
 
-	id: number
-	username: string
+	attributes: IGamePlayerAttributes
+
+	lastSecondOf: {
+		move: number
+	} = {
+		move: 0
+	}
 
 	constructor(
 		attributes: IGamePlayerAttributes
 	) {
 		super(GameObjectType.PLAYER, attributes)
-
-		this.id = attributes.id
-		this.username = attributes.username
 	}
 
 }
