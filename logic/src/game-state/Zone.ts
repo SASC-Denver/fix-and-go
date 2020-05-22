@@ -185,7 +185,9 @@ export class Zone {
 		object: IGameObject
 	): boolean {
 		const coordinates = object.attributes.coordinates
-		if (!object || this.objectLayout[coordinates.y][coordinates.x]) {
+		if (!object || !this.objectLayout
+			|| !this.objectLayout[coordinates.y]
+			|| this.objectLayout[coordinates.y][coordinates.x]) {
 			return false
 		}
 		this.objectLayout[coordinates.y][coordinates.x] = object

@@ -24,7 +24,19 @@ export interface ISignInRequest
 }
 
 export interface ISignInResponse
-	extends IResponse, IGamePlayerAttributes {
+	extends IResponse,
+	        IGamePlayerAttributes {
+}
+
+export interface IChatRequest
+	extends IRequest {
+	text: string
+}
+
+export interface IChatMessageResponse {
+	id: number
+	text: string
+	username: string
 }
 
 export interface IMoveRequest

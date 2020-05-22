@@ -2,14 +2,15 @@
 import {
 	ErrorCode,
 	GamePlayer,
+	IChatRequest,
+	IChatSecondUpdateResponse,
 	IGamePlayerAttributes,
 	IMoveRequest,
 	ISignInRequest,
 	IZoneUpdate,
 	IZoneUpdates,
 	testZoneAttributes,
-	Zone,
-	ZoneUpdateType
+	Zone
 }                      from '@fix-and-go/logic'
 import * as fastifyLib from 'fastify'
 
@@ -36,9 +37,15 @@ const players: {
 
 let testZone: Zone
 
-let updates: IZoneUpdates
+let updates: IZoneUpdates = {}
 
-let currentSecond = 0
+let lastMessageId = 0
+
+let currentSecond                             = 0
+const recentChat: IChatSecondUpdateResponse[] = [{
+	messages: [],
+	second: currentSecond,
+}]
 
 initGame()
 
@@ -93,6 +100,35 @@ fastify.put('/api/signIn', async (
 		}
 
 	return playerAttributes
+})
+
+// Declare a route
+fastify.put('/api/chat', async (
+	request,
+	reply
+) => {
+	const data: IChatRequest = request.body
+	// console.log(data)
+
+	if (typeof data.playerId !== 'number'
+		|| typeof data.text !== 'string'
+		|| !players[data.playerId]) {
+		return {
+			error: {
+				code: ErrorCode.INVALID_REQUEST,
+				description: 'Invalid request'
+			}
+		}
+	}
+	const player = players[data.playerId]
+
+	recentChat[recentChat.length - 1].messages.push({
+		id: ++lastMessageId,
+		text: data.text,
+		username: player.attributes.username
+	})
+
+	return {}
 })
 
 // Declare a route
@@ -199,21 +235,29 @@ fastify.get('/api/updates', async (
 	request,
 	reply
 ) => {
+	const lastUpdateSecond = parseInt(request.query.lastUpdateSecond)
 	const playerId         = parseInt(request.query.playerId)
 	// tslint:disable-next-line:use-isnan
-	if (playerId === NaN) {
+	if (playerId === NaN || lastUpdateSecond === NaN) {
 		return {
 			error: {
 				code: ErrorCode.INVALID_REQUEST,
-				description: 'playerId is not a number'
+				description: 'Invalid "Get Updates" input'
 			}
 		}
 	}
+
+	const chat = recentChat.filter(messagesForSecond => messagesForSecond.second >= lastUpdateSecond)
+
 	// console.log('playerId: ' + playerId)
 	const updatesForPlayer = updates[playerId]
 	return {
-		dimensions: testZone.dimensions,
-		updates: updatesForPlayer ? updatesForPlayer : []
+		chat,
+		currentSecond,
+		zone: {
+			dimensions: testZone.dimensions,
+			updates: updatesForPlayer ? updatesForPlayer : []
+		}
 	}
 })
 
@@ -232,6 +276,7 @@ start()
 
 function trackTime() {
 	updates = {}
+
 	for (const playerId in players) {
 		const player                       = players[playerId]
 		player.visionRange                 = {
@@ -259,19 +304,24 @@ function trackTime() {
 					&& coordinates.y >= player.visionRange.low.y
 					&& coordinates.y <= player.visionRange.high.y) {
 					// console.log('in range')
-					const zoneLocationUpdate: IZoneUpdate = {
-						object: object.attributes,
-						type: ZoneUpdateType.ZONE
-					}
-
-					playerUpdates.push(zoneLocationUpdate)
+					playerUpdates.push(object.attributes)
 				}
 			}
 		}
 	}
 
+	while (recentChat.length > 5) {
+		recentChat.shift()
+	}
+
 	const currentMillisecond = new Date().getTime()
 	currentSecond            = Math.floor(currentMillisecond / 1000)
 	const secondRemainder    = new Date().getTime() % 1000
+
+	recentChat.push({
+		messages: [],
+		second: currentSecond,
+	})
+
 	setTimeout(trackTime, 1000 - secondRemainder)
 }

@@ -1,25 +1,23 @@
 import {IZoneDimensions}       from '../../game-state/Zone'
 import {IGameObjectAttributes} from '../GameObject'
+import {IChatMessageResponse}  from './data'
 
 export interface IZoneUpdates {
 	[playerId: number]: IZoneUpdate[]
 }
 
-export interface IUpdateRequest {
-	playerId: number
+export interface IChatSecondUpdateResponse {
+	messages: IChatMessageResponse[]
+	second: number
 }
 
 export interface IUpdateResponse {
-	dimensions: IZoneDimensions
-	updates: IZoneUpdate[]
+	chat: IChatSecondUpdateResponse[]
+	currentSecond: number
+	zone: {
+		dimensions: IZoneDimensions
+		updates: IZoneUpdate[]
+	}
 }
 
-export enum ZoneUpdateType {
-	MESSAGE,
-	ZONE,
-}
-
-export interface IZoneUpdate {
-	object: IGameObjectAttributes
-	type: ZoneUpdateType.ZONE
-}
+export type IZoneUpdate = IGameObjectAttributes

@@ -7,13 +7,14 @@
     import Inventory from './Inventory.svelte'
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
-    import {lastMessage} from "./ui-state";
+    import {lastChatBatch, lastMessage} from "./ui-state";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
     let eventCount = 0
-    let testZone
+    let lastUpdateSecond = 0
     let player
+    let testZone
 
     onMount(async () => {
         testZone = new Zone();
@@ -41,6 +42,10 @@
 
     function handleMove(moveEvent) {
         move(moveEvent.detail.positionChange).then()
+    }
+
+    function handleCreateChatMessage(chatEvent) {
+        chat(chatEvent.detail.text).then()
     }
 
     async function signIn() {
@@ -85,6 +90,30 @@
         }
     }
 
+    async function chat(
+        text
+    ) {
+        let data = null
+        try {
+            data = await putData('api/chat', {
+                playerId: player.attributes.id,
+                text
+            });
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return;
+        }
+        if (data.error) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+        }
+    }
+
     async function updateFromServer() {
         let timestamp = new Date().getTime()
         const secondsBeforeUpdate = Math.floor(timestamp / 1000)
@@ -106,12 +135,15 @@
     async function getUpdates() {
         let data
         try {
-            data = await getData('api/updates?playerId=' + player.attributes.id);
-            testZone.updateObjects(data.dimensions,
-                data.updates
-                    .filter(update => update.type === ZoneUpdateType.ZONE)
-                    .map(update => update.object),
+            data = await getData('api/updates?playerId=' + player.attributes.id
+            + '&lastUpdateSecond=' + lastUpdateSecond);
+            testZone.updateObjects(data.zone.dimensions,
+                data.zone.updates,
                 player)
+            if(data.chat.length) {
+                lastChatBatch.set(data.chat);
+            }
+            lastUpdateSecond = data.currentSecond
             changeCount++
         } catch (e) {
             lastMessage.set({
@@ -213,7 +245,9 @@
 </header>
 <section class="middle">
     <aside class="info">
-        <Chat></Chat>
+        <Chat
+                on:chat="{handleCreateChatMessage}"
+        ></Chat>
         <br>
         <br>
         <Events></Events>
