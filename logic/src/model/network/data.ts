@@ -15,7 +15,7 @@ export interface IResponse {
 
 export interface IResponseError {
 	code: ErrorCode
-	message: string
+	description: string
 }
 
 export interface ISignInRequest
