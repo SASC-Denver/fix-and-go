@@ -61,9 +61,15 @@ export class Zone {
 
 	/*
 	Two dimensional array of references to objects in the zone,
-	with array indexes being the X and Y coordinates.
+	with array indexes being the Y and X coordinates.
 	 */
 	objectLayout: IGameObject[][] = []
+
+	/*
+	Two dimensional array of references to items in the zone,
+	with array indexes being the Y and X coordinates.
+	 */
+	itemLayout: IGameObject[][][] = []
 
 	/**
 	 * Zones are rectangles with coordinates from 0 to endX and 0 to endY
@@ -82,7 +88,7 @@ export class Zone {
 			x: attributes.dimensions.x,
 			y: attributes.dimensions.y
 		}
-		this.initObjectLayout()
+		this.initLayouts()
 
 		if (attributes.bosses) {
 			for (let i = 0; i < attributes.bosses.length; i++) {
@@ -122,12 +128,15 @@ export class Zone {
 		}
 	}
 
-	initObjectLayout(): void {
+	initLayouts(): void {
 		this.objectLayout = []
+		this.itemLayout   = []
 		for (let y = 0; y < this.dimensions.y; y++) {
 			this.objectLayout[y] = []
+			this.itemLayout[y]   = []
 			for (let x = 0; x < this.dimensions.x; x++) {
 				this.objectLayout[y][x] = null
+				this.itemLayout[y][x]   = []
 			}
 		}
 	}
@@ -139,7 +148,7 @@ export class Zone {
 	): void {
 		this.dimensions       = dimensions
 		this.objectsDirectory = {}
-		this.initObjectLayout()
+		this.initLayouts()
 
 		attributesList.forEach(attributes => {
 			switch (attributes.type) {
@@ -197,12 +206,16 @@ export class Zone {
 		}
 
 		const coordinates = object.attributes.coordinates
-		if (!object || !this.objectLayout
+
+		if (object instanceof GameItem) {
+			this.itemLayout[coordinates.y][coordinates.x].push(object)
+		} else if (!this.objectLayout
 			|| !this.objectLayout[coordinates.y]
 			|| this.objectLayout[coordinates.y][coordinates.x]) {
 			return false
+		} else {
+			this.objectLayout[coordinates.y][coordinates.x] = object
 		}
-		this.objectLayout[coordinates.y][coordinates.x] = object
 
 		directoryForType[object.attributes.id] = object
 
@@ -272,9 +285,7 @@ export class Zone {
 			return false
 		}
 
-		const objectInNewLocation = this.objectLayout[newY][newX]
-
-		if (objectInNewLocation) {
+		if (this.objectLayout[newY][newX]) {
 			return false
 		}
 

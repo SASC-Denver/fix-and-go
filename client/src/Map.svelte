@@ -145,7 +145,18 @@
                         continue;
                     }
 
-                    view[viewY][viewX] = zone.objectLayout[y][x];
+                    const gameObject = zone.objectLayout[y][x];
+
+                    if(gameObject) {
+                        view[viewY][viewX] = gameObject;
+                    } else {
+                        const gameItems = zone.itemLayout[y][x];
+                        if(gameItems.length) {
+                            view[viewY][viewX] = gameItems[0];
+                        } else {
+                            view[viewY][viewX] = null;
+                        }
+                    }
                 } finally {
                     viewX++;
                 }
