@@ -1,6 +1,7 @@
 import * as fastifyLib from 'fastify'
 import {ChatManager}   from './ChatManager'
 import {Coordinator}   from './Coordinator'
+import {startDb}       from './db/DbDriver'
 import {PlayerManager} from './PlayerManager'
 import {ZoneManager}   from './ZoneManager'
 
@@ -34,11 +35,27 @@ fastify.get('/api/hello', async (
 })
 
 // Declare a route
+fastify.put('/api/signUp', async (
+	request,
+	reply
+) => {
+	return await playerManager.signUp(request.body)
+})
+
+// Declare a route
 fastify.put('/api/signIn', async (
 	request,
 	reply
 ) => {
-	return playerManager.signIn(request.body)
+	return await playerManager.signIn(request.body)
+})
+
+// Declare a route
+fastify.put('/api/resetPassword', async (
+	request,
+	reply
+) => {
+	return await playerManager.resetPassword(request.body)
 })
 
 // Declare a route
@@ -79,6 +96,8 @@ function initGame(): void {
 const start = async () => {
 	try {
 		initGame()
+		startDb()
+		await playerManager.userDao.createTable()
 		await fastify.listen(8081)
 		fastify.log.info(`server listening on ${(fastify.server as any).address().port}`)
 		coordinator.trackTime()

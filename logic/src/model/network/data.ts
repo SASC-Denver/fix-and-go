@@ -18,14 +18,36 @@ export interface IResponseError {
 	description: string
 }
 
-export interface ISignInRequest
+export interface ISignUpRequest
 	extends IRequest {
+	email: string
+	password: string
 	username: string
 }
 
+export interface ISignUpResponse
+	extends IResponse {
+	attributes: IGamePlayerAttributes
+}
+
+export interface ISignInRequest
+	extends IRequest {
+	email: string
+	password: string
+}
+
 export interface ISignInResponse
-	extends IResponse,
-	        IGamePlayerAttributes {
+	extends IResponse {
+	attributes: IGamePlayerAttributes
+}
+
+export interface IResetPasswordRequest
+	extends IRequest {
+	email: string
+}
+
+export interface IResetPasswordResponse
+	extends IResponse {
 }
 
 export interface IChatRequest

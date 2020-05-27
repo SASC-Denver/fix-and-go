@@ -1,3 +1,4 @@
+export * from './auth/CredentialsChecker';
 export * from './game-state/Zone';
 export * from './model/network/data';
 export * from './model/network/updates';

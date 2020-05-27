@@ -5,9 +5,8 @@
 	} from 'svelte'
 	import {
 		stateOfPopup
-	} from '@fix-and-go/logic'
+	} from '../ui-state'
 
-	export let desktopWidth
 	export let height = 'initial'
 	export let maxWidth
 	export let width
@@ -54,9 +53,7 @@
     }
 </style>
 
-<aside
-        transition:fade='{{duration  100}}'
->
+<aside>
     <div>
         <section
                 style="

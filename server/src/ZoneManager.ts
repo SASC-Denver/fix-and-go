@@ -121,8 +121,10 @@ export class ZoneManager {
 
 	addPlayer(
 		player: GamePlayer
-	): void {
+	): boolean | GamePlayer {
 		const playerAttributes = player.attributes
+
+		let addResult: boolean | GamePlayer = false
 		ADD_PLAYER_TO_ZONE:
 			for (let x = playerAttributes.coordinates.x; x < this.testZone.dimensions.x; x++) {
 				for (let y = playerAttributes.coordinates.y; y < this.testZone.dimensions.y; y++) {
@@ -130,11 +132,14 @@ export class ZoneManager {
 						x,
 						y
 					}
-					if (this.testZone.add(player)) {
+					addResult                    = this.testZone.add(player)
+					if (addResult) {
 						break ADD_PLAYER_TO_ZONE
 					}
 				}
 			}
+
+		return addResult
 	}
 
 	update(): void {

@@ -1,13 +1,14 @@
 <script>
-    import {ErrorCode, GamePlayer, Zone, ZoneUpdateType} from '@fix-and-go/logic'
+    import {ErrorCode, GamePlayer, Zone} from '@fix-and-go/logic'
     import {onDestroy, onMount} from 'svelte'
+    import SignIn from './shell/SignIn.svelte'
     import Chat from './Chat.svelte'
     import Equipment from './Equipment.svelte'
     import Events from './Events.svelte'
     import Inventory from './Inventory.svelte'
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
-    import {lastChatBatch, lastMessage} from "./ui-state";
+    import {lastChatBatch, lastMessage, showSignIn, signInError} from "./ui-state";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
@@ -18,14 +19,6 @@
 
     onMount(async () => {
         testZone = new Zone();
-        signIn().then(playerAttributes => {
-            if (!playerAttributes) {
-                return;
-            }
-            updateFromServer().then()
-            player = new GamePlayer(playerAttributes);
-            testZone.add(player);
-        })
         // textToastUnsubscribe = stateOfTextToast.subscribe(
         // 	value => {
         // 		lastTextToast = value
@@ -35,6 +28,15 @@
         // 		}, value.seconds * 1000)
         // 	})
     })
+
+    function onSignIn(playerAttributes) {
+        if (!playerAttributes) {
+            return;
+        }
+        player = new GamePlayer(playerAttributes);
+        testZone.add(player);
+        updateFromServer().then()
+    }
 
     onDestroy(() => {
         // textToastUnsubscribe()
@@ -46,21 +48,6 @@
 
     function handleCreateChatMessage(chatEvent) {
         chat(chatEvent.detail.text).then()
-    }
-
-    async function signIn() {
-        let data
-        try {
-            return await putData('api/signIn', {
-                username: 'Player' + Math.floor(Math.random() * Math.floor(1000))
-            });
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Server not responding, please (re)start the server and reload this page.'
-            });
-            return null;
-        }
     }
 
     async function move(positionChange) {
@@ -78,7 +65,7 @@
             return;
         }
         if (data.error) {
-            switch(data.error.code) {
+            switch (data.error.code) {
                 case ErrorCode.REQUESTING_TOO_FREQUENTLY:
                     // No message needed?
                     return;
@@ -136,11 +123,11 @@
         let data
         try {
             data = await getData('api/updates?playerId=' + player.attributes.id
-            + '&lastUpdateSecond=' + lastUpdateSecond);
+                + '&lastUpdateSecond=' + lastUpdateSecond);
             testZone.updateObjects(data.zone.dimensions,
                 data.zone.updates,
                 player)
-            if(data.chat.length) {
+            if (data.chat.length) {
                 lastChatBatch.set(data.chat);
             }
             lastUpdateSecond = data.currentSecond
@@ -151,6 +138,66 @@
                 value: 'Connection lost'
             });
         }
+    }
+
+    function signIn(event) {
+        doSignIn(event.detail)
+    }
+
+    async function doSignIn(
+        inputData
+    ) {
+        let data;
+        try {
+            data = await putData('api/signIn', inputData);
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return false;
+        }
+        if (data.error) {
+            signInError.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return false;
+        }
+        onSignIn(data.attributes);
+        showSignIn.set(false);
+
+        return true
+    }
+
+    function signUp(event) {
+        doSignUp(event.detail)
+    }
+
+    async function doSignUp(
+        inputData
+    ) {
+        let data;
+        try {
+            data = await putData('api/signUp', inputData);
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return false;
+        }
+        if (data.error) {
+            signInError.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return false;
+        }
+        onSignIn(data.attributes);
+        showSignIn.set(false);
+
+        return true;
     }
 
     async function getData(url) {
@@ -269,3 +316,9 @@
         </aside>
     </main>
 </section>
+{#if $showSignIn}
+<SignIn
+        on:signIn="{signIn}"
+        on:signUp="{signUp}"
+></SignIn>
+{/if}

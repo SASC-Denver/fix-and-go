@@ -181,9 +181,21 @@ export class Zone {
 	 *
 	 * @return true if object was added, false otherwise
 	 */
-	add(
-		object: IGameObject
-	): boolean {
+	add<GO extends IGameObject>(
+		object: GO
+	): boolean | GO {
+
+		let directoryForType = this.objectsDirectory[object.attributes.type]
+		if (!directoryForType) {
+			directoryForType                              = {}
+			this.objectsDirectory[object.attributes.type] = directoryForType
+		}
+
+		if (directoryForType[object.attributes.id]) {
+			// This object is already in place
+			return directoryForType[object.attributes.id] as GO
+		}
+
 		const coordinates = object.attributes.coordinates
 		if (!object || !this.objectLayout
 			|| !this.objectLayout[coordinates.y]
@@ -191,12 +203,6 @@ export class Zone {
 			return false
 		}
 		this.objectLayout[coordinates.y][coordinates.x] = object
-
-		let directoryForType = this.objectsDirectory[object.attributes.type]
-		if (!directoryForType) {
-			directoryForType                              = {}
-			this.objectsDirectory[object.attributes.type] = directoryForType
-		}
 
 		directoryForType[object.attributes.id] = object
 
