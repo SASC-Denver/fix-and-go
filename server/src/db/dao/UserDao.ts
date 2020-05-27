@@ -87,7 +87,8 @@ FROM
 WHERE
 	email_hash = ?`, emailHash)
 
-		if (records) {
+		if (records && records.length) {
+			// console.log(JSON.stringify(records, null, 2))
 			records[0].attributes = JSON.parse(records[0].attributes)
 
 			return records[0] as IUser

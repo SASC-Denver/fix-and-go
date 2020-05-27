@@ -75,7 +75,7 @@ export class PlayerManager {
 	async signIn(
 		signInRequest: ISignInRequest
 	): Promise<IResponse | ISignInResponse> {
-		// console.log(signInRequest)
+		// console.log(JSON.stringify(signInRequest, null, 2))
 
 		const emailHash = await this.encodeStringValue(signInRequest.email)
 
@@ -114,6 +114,7 @@ export class PlayerManager {
 	private addPlayer(
 		user: IUser
 	): ISignInResponse | ISignUpResponse {
+		// console.log(JSON.stringify(user, null, 2))
 		user.attributes.id = user.id
 
 		// console.log('Player id: ' + user.id)

@@ -272,17 +272,21 @@ export class Zone {
 			return false
 		}
 
-		if (this.objectLayout[newY][newX]) {
+		const objectInNewLocation = this.objectLayout[newY][newX]
+
+		if (objectInNewLocation) {
 			return false
 		}
 
-		if (this.objectLayout[object.attributes.coordinates.y][object.attributes.coordinates.x]
+		if (this.objectLayout
+				[object.attributes.coordinates.y][object.attributes.coordinates.x]
 			!== object) {
 			return false
 		}
 
-		this.objectLayout[object.attributes.coordinates.y][object.attributes.coordinates.x] = null
-		this.objectLayout[newY][newX]                                                       = object
+		this.objectLayout[object.attributes.coordinates.y][object.attributes.coordinates.x]
+			                            = null
+		this.objectLayout[newY][newX] = object
 
 		object.attributes.coordinates = {
 			x: newX,
