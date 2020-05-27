@@ -1,7 +1,5 @@
 <script>
-    import {
-        GameObjectType,
-    } from '@fix-and-go/logic'
+    import {GameObjectType,} from '@fix-and-go/logic'
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
 
     const dispatch = createEventDispatcher();
@@ -35,7 +33,7 @@
             case GameObjectType.OBSTACLE:
                 return '^^^^^^' + getCoords(gameObject);
             case GameObjectType.PLAYER:
-                return 'Player' + getCoords(gameObject);
+                return gameObject.attributes.username + getCoords(gameObject);
             case GameObjectType.PORTAL:
                 return 'Portal' + getCoords(gameObject);
             case GameObjectType.STORE:
@@ -166,6 +164,17 @@
     .map td {
         padding: 0;
     }
+
+    .map td div {
+        align-content: center;
+        display: flex;
+        flex-direction: column;
+        height: 50px;
+        justify-content: center;
+        overflow: hidden;
+        text-align: center;
+        word-break: break-all;
+    }
 </style>
 
 <table class="map">
@@ -173,7 +182,9 @@
     <tr>
         {#each mapViewRow as mapObject, viewX}
         <td on:click="{event => handleClick(viewX, viewY)}">
-            {render(mapObject)}
+            <div>
+                {render(mapObject)}
+            </div>
             <!--x{viewX}, y{viewY}-->
         </td>
         {/each}

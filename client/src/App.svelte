@@ -151,7 +151,7 @@
         try {
             data = await putData('api/signIn', inputData);
         } catch (e) {
-            lastMessage.set({
+            signInError.set({
                 eventId: ++eventCount,
                 value: 'Connection lost'
             });
@@ -181,7 +181,7 @@
         try {
             data = await putData('api/signUp', inputData);
         } catch (e) {
-            lastMessage.set({
+            signInError.set({
                 eventId: ++eventCount,
                 value: 'Connection lost'
             });

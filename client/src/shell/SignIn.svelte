@@ -34,7 +34,10 @@
         const errorResponse = credentialsChecker
             .checkSignInCredentials(email, password);
         if (errorResponse) {
-            signInError.set(errorResponse.description);
+            signInError.set({
+                eventId: 0,
+                value: errorResponse.description
+            });
             return;
         }
 
@@ -52,7 +55,10 @@
         const errorResponse = credentialsChecker
             .checkSignUpCredentials(username, email, password);
         if (errorResponse) {
-            signInError.set(errorResponse.description);
+            signInError.set({
+                eventId: 0,
+                value: errorResponse.description
+            });
             return;
         }
 
@@ -67,7 +73,10 @@
         const errorResponse = credentialsChecker
             .checkResetPasswordCredentials(email);
         if (errorResponse) {
-            signInError.set(errorResponse.description);
+            signInError.set({
+                eventId: 0,
+                value: errorResponse.description
+            });
             return;
         }
 

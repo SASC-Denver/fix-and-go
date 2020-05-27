@@ -119,6 +119,10 @@ export class CredentialsChecker {
 			return 'Username must be at least 3 characters long'
 		}
 
+		if (username.length > 12) {
+			return 'Username cannot be more than 12 characters long'
+		}
+
 		return null
 	}
 
