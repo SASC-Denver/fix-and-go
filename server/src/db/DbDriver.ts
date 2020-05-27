@@ -8,7 +8,7 @@ export function closeDb() {
 
 export function startDb() {
 	// db = new sqlite3.verbose().Database(':memory:');
-	db = new sqlite3.Database(':memory:')
+	db = new sqlite3.Database('../../fix-n-go.sqlite3')
 	// db = new sqlite3.Database('test.db');
 }
 

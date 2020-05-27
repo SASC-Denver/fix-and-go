@@ -1,7 +1,10 @@
 import * as fastifyLib from 'fastify'
 import {ChatManager}   from './ChatManager'
 import {Coordinator}   from './Coordinator'
-import {startDb}       from './db/DbDriver'
+import {
+	closeDb,
+	startDb
+}                      from './db/DbDriver'
 import {PlayerManager} from './PlayerManager'
 import {ZoneManager}   from './ZoneManager'
 
@@ -106,4 +109,17 @@ const start = async () => {
 		process.exit(1)
 	}
 }
+
+// process.on('exit', () => {
+// 	console.log('About to exit, waiting for remaining connections to complete')
+// 	// app.close();
+// })
+
+process.on('SIGINT', () => {
+	console.log('Caught interrupt signal')
+	closeDb()
+	console.log('Database closed.')
+	process.exit()
+})
+
 start()

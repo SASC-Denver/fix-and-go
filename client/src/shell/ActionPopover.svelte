@@ -19,10 +19,6 @@
 </script>
 
 <style>
-	div[slot="content"] {
-		color: #222;
-	}
-
 	footer {
 		text-align: center;
 		width: 100%;

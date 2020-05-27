@@ -91,6 +91,12 @@
 </script>
 
 <style>
+    nav {
+        color: blue;
+        display: inline-block;
+        text-decoration: underline;
+    }
+
     table {
         width: 100%;
     }
@@ -128,18 +134,18 @@
     <div slot="content">
         {#if signInMode}
         New Users:
-        <button
+        <nav
                 on:click="{() => setSignIn(false)}"
         >
             Sign Up
-        </button>
+        </nav>
         {:else}
         Existing Users:
-        <button
+        <nav
                 on:click="{() => setSignIn(true)}"
         >
             Sign In
-        </button>
+        </nav>
         {/if}
         <br>
         {#if $signInError}

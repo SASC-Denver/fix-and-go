@@ -14,6 +14,7 @@ dependencies:
   mini-css-extract-plugin: 0.5.0_webpack@4.42.1
   optimize-css-assets-webpack-plugin: 5.0.3_webpack@4.42.1
   serve: 10.1.2
+  shutdown-hook: 1.1.5
   sqlite3: 4.2.0
   style-loader: 0.23.1
   svelte-loader: 2.13.6
@@ -566,6 +567,10 @@ packages:
     optional: true
     resolution:
       integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==
+  /bluebird/3.3.4:
+    dev: false
+    resolution:
+      integrity: sha1-94D+Q+GnplEPZ6vX0NeVM6QN3eY=
   /bluebird/3.7.2:
     dev: false
     resolution:
@@ -3549,6 +3554,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
+  /lodash/4.17.14:
+    dev: false
+    resolution:
+      integrity: sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
   /lodash/4.17.15:
     dev: false
     resolution:
@@ -5591,6 +5600,13 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
+  /shutdown-hook/1.1.5:
+    dependencies:
+      bluebird: 3.3.4
+      lodash: 4.17.14
+    dev: false
+    resolution:
+      integrity: sha512-q3E++QLvo0N9aAovPN8wMDXlwsgLdTjT7VL/RHKjHCG3GA0ujz6pk8hTw7gAewL10vzQGxTuDVgQ6mf4uO1bXw==
   /signal-exit/3.0.3:
     dev: false
     resolution:
@@ -6818,13 +6834,14 @@ packages:
       fastify-cors: 3.0.3
       jssha: 3.1.0
       prettier: 2.0.5
+      shutdown-hook: 1.1.5
       sqlite3: 4.2.0
       tslint: 5.20.1_typescript@3.8.3
       typescript: 3.8.3
     dev: false
     name: '@rush-temp/server'
     resolution:
-      integrity: sha512-OfpqN0lDIVX48EXogtlKMCmznyvSeIdKFmgOEOHJ5aVNEUOPYEkC2mfl1VpBiFeJzUn7W7oCVrk8OALzrzkO0w==
+      integrity: sha512-0MTlTf7DJ4hnbtsWQpTr+Ml5cxptxIyrJLXnPo0Dj+G+8heJCSD9PGRvj6cxdIeg/eiMLw/wVuRaNJAeZVQiCA==
       tarball: 'file:projects/server.tgz'
     version: 0.0.0
 registry: ''
@@ -6844,6 +6861,7 @@ specifiers:
   mini-css-extract-plugin: ^0.5.0
   optimize-css-assets-webpack-plugin: ^5.0.x
   serve: ^10.1.1
+  shutdown-hook: ^1.1.5
   sqlite3: ^4.2.0
   style-loader: ^0.23.1
   svelte-loader: ^2.13.6
