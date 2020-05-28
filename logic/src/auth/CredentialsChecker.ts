@@ -26,6 +26,38 @@ export class CredentialsChecker {
 		return null
 	}
 
+	serverCheckCredentials(
+		username: string,
+		encodedEmail: string,
+		encodedPassword: string
+	): IResponseError {
+		const errorText = this.validateUsername(username)
+		if (errorText) {
+			return {
+				code: ErrorCode.INVALID_REQUEST,
+				description: errorText
+			}
+		}
+
+		if (typeof encodedEmail !== 'string'
+			|| encodedEmail.length !== 88) {
+			return {
+				code: ErrorCode.INVALID_REQUEST,
+				description: 'Invalid email'
+			}
+		}
+
+		if (typeof encodedPassword !== 'string'
+			|| encodedPassword.length !== 88) {
+			return {
+				code: ErrorCode.INVALID_REQUEST,
+				description: 'Invalid password'
+			}
+		}
+
+		return null
+	}
+
 	checkSignUpCredentials(
 		username: string,
 		email: string,

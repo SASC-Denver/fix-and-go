@@ -8,7 +8,14 @@
     import Inventory from './Inventory.svelte'
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
-    import {lastChatBatch, lastMessage, showSignIn, signInError} from "./ui-state";
+    import {
+        getCredentials,
+        lastChatBatch,
+        lastMessage,
+        setCredentials,
+        showSignIn,
+        signInError
+    } from "./ui-state";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
@@ -19,6 +26,15 @@
 
     onMount(async () => {
         testZone = new Zone();
+
+        const credentials = getCredentials();
+
+        if (credentials) {
+            showSignIn.set(false);
+            if (!await doSignIn(credentials)) {
+                showSignIn.set(true);
+            }
+        }
         // textToastUnsubscribe = stateOfTextToast.subscribe(
         // 	value => {
         // 		lastTextToast = value
@@ -141,7 +157,7 @@
     }
 
     function signIn(event) {
-        doSignIn(event.detail)
+        doSignIn(event.detail).then()
     }
 
     async function doSignIn(
@@ -164,6 +180,8 @@
             });
             return false;
         }
+
+        setCredentials(inputData);
         onSignIn(data.attributes);
         showSignIn.set(false);
 
@@ -171,7 +189,7 @@
     }
 
     function signUp(event) {
-        doSignUp(event.detail)
+        doSignUp(event.detail).then()
     }
 
     async function doSignUp(
@@ -194,6 +212,7 @@
             });
             return false;
         }
+        setCredentials(inputData);
         onSignIn(data.attributes);
         showSignIn.set(false);
 
@@ -201,6 +220,7 @@
     }
 
     async function getData(url) {
+        // console.log('GET: ' + url);
         const response = await fetch(url, {
             method: 'GET',
             mode: 'cors',
@@ -209,6 +229,8 @@
     }
 
     async function putData(url, data) {
+        // console.log('PUT: ' + url);
+        // console.log(JSON.stringify(data, null, 2));
         const response = await fetch(url, {
             method: 'PUT',
             mode: 'cors',
@@ -282,7 +304,9 @@
         <table>
             <tr>
                 <td>Attack</td>
-                <td>PickUp</td>
+                <td
+                >PickUp
+                </td>
                 <td> ...</td>
                 <td> ...</td>
                 <td> ...</td>

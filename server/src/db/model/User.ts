@@ -3,9 +3,9 @@ import {IGamePlayerAttributes} from '@fix-and-go/logic'
 export interface IUser {
 
 	attributes?: IGamePlayerAttributes;
-	emailHash?: string;
+	encodedEmail?: string;
 	id?: number;
-	passwordHash?: string;
+	encodedPassword?: string;
 	userId?: number;
 	username?: string;
 

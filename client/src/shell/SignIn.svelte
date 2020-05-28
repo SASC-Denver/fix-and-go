@@ -31,6 +31,10 @@
     })
 
     function signIn() {
+        doSignIn().then();
+    }
+
+    async function doSignIn() {
         const errorResponse = credentialsChecker
             .checkSignInCredentials(email, password);
         if (errorResponse) {
@@ -40,10 +44,9 @@
             });
             return;
         }
-
         dispatch('signIn', {
-            email,
-            password
+            encodedEmail: await encodeString(email),
+            encodedPassword: await encodeString(password)
         });
     }
 
@@ -52,6 +55,10 @@
     }
 
     function signUp() {
+        doSignUp().then()
+    }
+
+    async function doSignUp() {
         const errorResponse = credentialsChecker
             .checkSignUpCredentials(username, email, password);
         if (errorResponse) {
@@ -63,10 +70,21 @@
         }
 
         dispatch('signUp', {
-            email,
-            password,
+            encodedEmail: await encodeString(email),
+            encodedPassword: await encodeString(password),
             username
         });
+    }
+
+    async function encodeString(
+        aString
+    ) {
+        const jsSHA = await import('jssha/dist/sha512')
+
+        const shaObj = new jsSHA.default('SHA-512', 'TEXT')
+        shaObj.update(aString)
+
+        return shaObj.getHash('B64')
     }
 
     function resetPassword() {

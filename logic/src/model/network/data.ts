@@ -1,3 +1,5 @@
+import {GameObjectType}        from '../game'
+import {IGameItemAttributes}   from '../GameItem'
 import {IGamePlayerAttributes} from '../GamePlayer'
 
 export enum ErrorCode {
@@ -20,8 +22,8 @@ export interface IResponseError {
 
 export interface ISignUpRequest
 	extends IRequest {
-	email: string
-	password: string
+	encodedEmail: string
+	encodedPassword: string
 	username: string
 }
 
@@ -32,8 +34,8 @@ export interface ISignUpResponse
 
 export interface ISignInRequest
 	extends IRequest {
-	email: string
-	password: string
+	encodedEmail: string
+	encodedPassword: string
 }
 
 export interface ISignInResponse

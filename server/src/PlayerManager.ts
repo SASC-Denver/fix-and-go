@@ -31,8 +31,9 @@ export class PlayerManager {
 	): Promise<IResponse | ISignUpResponse> {
 		// console.log(signUpRequest)
 
-		const error = this.credentialsChecker.checkSignUpCredentials(
-			signUpRequest.username, signUpRequest.email, signUpRequest.password)
+		const error = this.credentialsChecker.serverCheckCredentials(
+			signUpRequest.username, signUpRequest.encodedEmail,
+			signUpRequest.encodedPassword)
 
 		if (error) {
 			return {
@@ -50,12 +51,10 @@ export class PlayerManager {
 			username: signUpRequest.username
 		}
 
-		const emailHash    = await this.encodeStringValue(signUpRequest.email)
-		const passwordHash = await this.encodeStringValue(signUpRequest.password)
-
 		try {
 			const user = await this.userDao.createUser(
-				signUpRequest.username, emailHash, passwordHash, attributes)
+				signUpRequest.username, signUpRequest.encodedEmail,
+				signUpRequest.encodedPassword, attributes)
 
 			// console.log(JSON.stringify(user, null, '\t'))
 
@@ -77,9 +76,7 @@ export class PlayerManager {
 	): Promise<IResponse | ISignInResponse> {
 		// console.log(JSON.stringify(signInRequest, null, 2))
 
-		const emailHash = await this.encodeStringValue(signInRequest.email)
-
-		const user = await this.userDao.findByEmailHash(emailHash)
+		const user = await this.userDao.findByEncodedEmail(signInRequest.encodedEmail)
 
 		if (!user) {
 			return {
@@ -90,9 +87,7 @@ export class PlayerManager {
 			}
 		}
 
-		const passwordHash = await this.encodeStringValue(signInRequest.password)
-
-		if (passwordHash !== user.passwordHash) {
+		if (signInRequest.encodedPassword !== user.encodedPassword) {
 			return {
 				error: {
 					code: ErrorCode.INVALID_REQUEST,

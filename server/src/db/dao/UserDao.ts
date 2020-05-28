@@ -13,30 +13,31 @@ export class UserDao
 		// console.log('Creating table "users"')
 		await run(`
 CREATE  TABLE IF NOT EXISTS users (
-  user_id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  username      VARCHAR(20)                   NOT NULL UNIQUE,
-  email_hash    VARCHAR(90)                  NOT NULL UNIQUE,
-  password_hash VARCHAR(90)                  NOT NULL,
-  attributes    TEXT                          NOT NULL
+  user_id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  username         VARCHAR(20)                       NOT NULL UNIQUE,
+  encoded_email    VARCHAR(90)                       NOT NULL UNIQUE,
+  encoded_password VARCHAR(90)                       NOT NULL,
+  attributes       TEXT                              NOT NULL
 );`)
 		// console.log('Creating unique index "users.username"')
 		await run(`
 CREATE UNIQUE INDEX IF NOT EXISTS users_username_uidx
 	ON users (username ASC);`)
-		// console.log('Creating unique index "users.email_hash"')
+		// console.log('Creating unique index "users.encoded_email"')
 		await run(`
-CREATE UNIQUE INDEX IF NOT EXISTS users_email_hash_uidx
-	ON users (email_hash ASC);`)
+CREATE UNIQUE INDEX IF NOT EXISTS users_encoded_email_uidx
+	ON users (encoded_email ASC);`)
 		// console.log('Done creating "users"')
 	}
 
 	async createUser(
 		username: string,
-		emailHash: string,
-		passwordHash: string,
+		encodedEmail: string,
+		encodedPassword: string,
 		attributes: IGamePlayerAttributes,
 	): Promise<IUser> {
-		const existingUsers = await this.findByUsernameOrEmailHash(username, emailHash)
+		const existingUsers = await this.findByUsernameOrEncodedEmail(
+			username, encodedEmail)
 
 		if (existingUsers.length) {
 			// console.log(JSON.stringify(existingUsers))
@@ -49,44 +50,46 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_email_hash_uidx
 
 		await run(`
 INSERT INTO users
-  (username, email_hash, password_hash, attributes)
+  (username, encoded_email, encoded_password, attributes)
 VALUES
-  (?, ?, ?, ?)`, username, emailHash, passwordHash, JSON.stringify(attributes))
+  (?, ?, ?, ?)`, username, encodedEmail,
+			encodedPassword, JSON.stringify(attributes))
 
-		return await this.findByEmailHash(emailHash)
+		return await this.findByEncodedEmail(encodedEmail)
 	}
 
-	async findByUsernameOrEmailHash(
+	async findByUsernameOrEncodedEmail(
 		username: string,
-		emailHash: string
+		encodedEmail: string
 	): Promise<IUser[]> {
 		return await find(`
 SELECT
 	user_id AS id,
 	username,
-	email_hash as emailHash
+	encoded_email as encodedEmail
 FROM
 	users
 WHERE
 	username = ?
-	OR email_hash = ?`, username, emailHash)
+	OR encoded_email = ?`, username, encodedEmail)
 	}
 
-	async findByEmailHash(
-		emailHash: string
+	async findByEncodedEmail(
+		encodedEmail: string
 	): Promise<IUser> {
 		const records: any[] = await find(`
 SELECT
 	user_id       AS id,
 	username,
-	email_hash    AS emailHash,
-	password_hash AS passwordHash,
+	encoded_email    AS encodedEmail,
+	encoded_password AS encodedPassword,
 	attributes
 FROM
 	users
 WHERE
-	email_hash = ?`, emailHash)
+	encoded_email = ?`, encodedEmail)
 
+		console.log(JSON.stringify(records, null, 2))
 		if (records && records.length) {
 			// console.log(JSON.stringify(records, null, 2))
 			records[0].attributes = JSON.parse(records[0].attributes)
