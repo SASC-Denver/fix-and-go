@@ -17,7 +17,7 @@ CREATE  TABLE IF NOT EXISTS users (
   username         VARCHAR(20)                       NOT NULL UNIQUE,
   encoded_email    VARCHAR(90)                       NOT NULL UNIQUE,
   encoded_password VARCHAR(90)                       NOT NULL,
-  attributes       TEXT                              NOT NULL
+  state            TEXT                              NOT NULL
 );`)
 		// console.log('Creating unique index "users.username"')
 		await run(`
@@ -50,10 +50,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_encoded_email_uidx
 
 		await run(`
 INSERT INTO users
-  (username, encoded_email, encoded_password, attributes)
+  (username, encoded_email, encoded_password, state)
 VALUES
   (?, ?, ?, ?)`, username, encodedEmail,
-			encodedPassword, JSON.stringify(attributes))
+			encodedPassword, JSON.stringify({
+				attributes
+			}))
 
 		return await this.findByEncodedEmail(encodedEmail)
 	}
@@ -83,16 +85,16 @@ SELECT
 	username,
 	encoded_email    AS encodedEmail,
 	encoded_password AS encodedPassword,
-	attributes
+	state
 FROM
 	users
 WHERE
 	encoded_email = ?`, encodedEmail)
 
-		console.log(JSON.stringify(records, null, 2))
+		// console.log(JSON.stringify(records, null, 2))
 		if (records && records.length) {
 			// console.log(JSON.stringify(records, null, 2))
-			records[0].attributes = JSON.parse(records[0].attributes)
+			records[0].attributes = JSON.parse(records[0].state).attributes
 
 			return records[0] as IUser
 		}
