@@ -103,7 +103,8 @@ export class CredentialsChecker {
 		const regex           = /^.*(?=.{8,})(?=.*[a-zA-Z])(?=.*\d).*$/
 		const isPasswordValid = regex.test(password)
 		if (!isPasswordValid) {
-			return 'Password must be at least 8 characters long, with at least one number and one of !#$%&?'
+			// return 'Password must be at least 8 characters long, with at least one number and one of !#$%&?'
+			return 'Password must be at least 8 characters long, with at least one number'
 		}
 
 		return null
