@@ -175,7 +175,7 @@ module.exports = {
 			filename: devMode ? '[name].css' : '[name].[contenthash].css'
 		}),
 		new WebpackShellPlugin({
-			onBuildStart: ['node build/setHash.js ' + staticHash],
+			// onBuildStart: ['node build/setHash.js ' + staticHash],
 			onBuildEnd: ['node build/addManifest.js ' + staticHash]
 		})
 	],

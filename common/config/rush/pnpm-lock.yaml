@@ -9,12 +9,12 @@ dependencies:
   eslint: 5.16.0
   fastify: 2.13.0
   fastify-cors: 3.0.3
+  fastify-static: 2.7.0
   html-webpack-plugin: 3.2.0_webpack@4.42.1
   jssha: 3.1.0
   mini-css-extract-plugin: 0.5.0_webpack@4.42.1
   optimize-css-assets-webpack-plugin: 5.0.3_webpack@4.42.1
   serve: 10.1.2
-  shutdown-hook: 1.1.5
   sqlite3: 4.2.0
   style-loader: 0.23.1
   svelte-loader: 2.13.6
@@ -2235,6 +2235,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-APBcb27s+MjaBIerFirYmBLatoPCgmHZM6XP0K+nDL9k0yX8NJPWDY1RAC3bh6z+AB5ULS2j31BUfLMT3uaZ4A==
+  /fastify-static/2.7.0:
+    dependencies:
+      fastify-plugin: 1.6.1
+      glob: 7.1.6
+      readable-stream: 3.6.0
+      send: 0.16.2
+    dev: false
+    resolution:
+      integrity: sha512-B+Ox0jL42OwGOzn01RTt+cPaIyCLsHURse1o6t+0tqiuTBlXUC7RkR+siuJ4/PSiRpy0cu5DA0Giu5d+gtXyjA==
   /fastify/2.13.0:
     dependencies:
       abstract-logging: 2.0.0
@@ -3749,6 +3758,11 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha512-01paPWYgLrkqAyrlDorC1uDwl2p3qZT7yl806vW7DvDoxwXi46jsjFbg+WdwotBIk6/MbEhO/dh5aZ5sNj/dWQ==
+  /mime/1.4.1:
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-KI1+qOZu5DcW6wayYHSzR/tXKCDC5Om4s1z2QJjDULzLcmf3DvzS7oluY4HCTrc+9FiKmWUgeNLg7W3uIQvxtQ==
   /mime/1.6.0:
     dev: false
     engines:
@@ -5470,6 +5484,26 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+  /send/0.16.2:
+    dependencies:
+      debug: 2.6.9
+      depd: 1.1.2
+      destroy: 1.0.4
+      encodeurl: 1.0.2
+      escape-html: 1.0.3
+      etag: 1.8.1
+      fresh: 0.5.2
+      http-errors: 1.6.3
+      mime: 1.4.1
+      ms: 2.0.0
+      on-finished: 2.3.0
+      range-parser: 1.2.1
+      statuses: 1.4.0
+    dev: false
+    engines:
+      node: '>= 0.8.0'
+    resolution:
+      integrity: sha512-E64YFPUssFHEFBvpbbjr44NCLtI1AohxQ8ZSiJjQLskAdKuriYEP6VyGEsRDH8ScozGpkaX1BGvhanqCwkcEZw==
   /send/0.17.1:
     dependencies:
       debug: 2.6.9
@@ -5799,6 +5833,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-YICcOcv/VTNyJv1eC1IPNB8ftcY=
+  /statuses/1.4.0:
+    dev: false
+    engines:
+      node: '>= 0.6'
+    resolution:
+      integrity: sha512-zhSCtt8v2NDrRlPQpCNtw/heZLtfUDqxBM1udqikb/Hbk52LK4nQSwr10u77iopCW5LsyHpuXS0GnEc48mLeew==
   /statuses/1.5.0:
     dev: false
     engines:
@@ -6832,6 +6872,7 @@ packages:
     dependencies:
       fastify: 2.13.0
       fastify-cors: 3.0.3
+      fastify-static: 2.7.0
       jssha: 3.1.0
       prettier: 2.0.5
       shutdown-hook: 1.1.5
@@ -6841,7 +6882,7 @@ packages:
     dev: false
     name: '@rush-temp/server'
     resolution:
-      integrity: sha512-0MTlTf7DJ4hnbtsWQpTr+Ml5cxptxIyrJLXnPo0Dj+G+8heJCSD9PGRvj6cxdIeg/eiMLw/wVuRaNJAeZVQiCA==
+      integrity: sha512-5NKL00uNpNeJEG7pA/+42oZoSsEaAxUth0SqhtWRIwd7AitGRWS17tALq5I3zIt5vsDI0xxXJdmMQcCAq7dsMg==
       tarball: 'file:projects/server.tgz'
     version: 0.0.0
 registry: ''
@@ -6856,12 +6897,12 @@ specifiers:
   eslint: ^5.14.1
   fastify: ^2.12.1
   fastify-cors: ^3.0.3
+  fastify-static: ^2.7.0
   html-webpack-plugin: ^3.2.x
   jssha: ^3.1.0
   mini-css-extract-plugin: ^0.5.0
   optimize-css-assets-webpack-plugin: ^5.0.x
   serve: ^10.1.1
-  shutdown-hook: ^1.1.5
   sqlite3: ^4.2.0
   style-loader: ^0.23.1
   svelte-loader: ^2.13.6

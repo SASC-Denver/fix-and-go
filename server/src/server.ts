@@ -29,6 +29,12 @@ fastify.register(require('fastify-cors'), {
 	}
 })
 
+console.log(__dirname);
+const path = require('path')
+fastify.register(require('fastify-static'), {
+	root: path.join(__dirname, 'public'),
+})
+
 // Declare a route
 fastify.get('/api/hello', async (
 	request,
