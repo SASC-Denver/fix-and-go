@@ -19,7 +19,8 @@ fastify.register(require('fastify-cors'), {
 		origin,
 		cb
 	) => {
-		if (!origin || /localhost/.test(origin) ||
+		// console.log('Origin: ' + origin)
+		if (!origin || /206\.189\.196\.29/.test(origin) || /localhost/.test(origin) ||
 			/86297555dce54909ab4c30f21c2e3db7.vfs.cloud9.us-east-2.amazonaws.com/.test(origin)) {
 			// Request from localhost or Cloud9 development server will pass 
 			cb(null, true)
@@ -107,7 +108,7 @@ const start = async () => {
 		initGame()
 		startDb()
 		await playerManager.userDao.createTable()
-		await fastify.listen(8081)
+		await fastify.listen(8081, '0.0.0.0')
 		fastify.log.info(`server listening on ${(fastify.server as any).address().port}`)
 		coordinator.trackTime()
 	} catch (err) {
