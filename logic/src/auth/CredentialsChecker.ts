@@ -99,7 +99,8 @@ export class CredentialsChecker {
 						(?=.*[!#$%&?]) : Special characters
 										.*$              : End
 		 */
-		const regex           = /^.*(?=.{8,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!#$%&?]).*$/
+		// const regex           = /^.*(?=.{8,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!#$%&?]).*$/
+		const regex           = /^.*(?=.{8,})(?=.*[a-zA-Z])(?=.*\d).*$/
 		const isPasswordValid = regex.test(password)
 		if (!isPasswordValid) {
 			return 'Password must be at least 8 characters long, with at least one number and one of !#$%&?'
