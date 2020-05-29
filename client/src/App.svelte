@@ -6,19 +6,23 @@
     import Equipment from './Equipment.svelte'
     import Events from './Events.svelte'
     import Inventory from './Inventory.svelte'
+    import ZoneItems from './shell/ZoneItems.svelte'
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
     import {
-        getCredentials,
+        getCredentials, inventory,
         lastChatBatch,
         lastMessage,
         setCredentials,
         showSignIn,
-        signInError
+        showZoneItems,
+        signInError,
+        zoneItemsError
     } from "./ui-state";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
+    let currentCellItems = []
     let eventCount = 0
     let lastUpdateSecond = 0
     let player
@@ -52,6 +56,7 @@
         player = new GamePlayer(playerAttributes);
         testZone.add(player);
         updateFromServer().then()
+        getInventory().then()
     }
 
     onDestroy(() => {
@@ -219,6 +224,150 @@
         return true;
     }
 
+    async function getInventory() {
+        doGetInventory().then()
+    }
+
+    async function doGetInventory() {
+        let data;
+        try {
+            data = await getData('api/getInventory?playerId=' + player.attributes.id);
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return;
+        }
+        if (data.error) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return;
+        }
+        onGetInventory(data.inventory);
+    }
+
+    function onGetInventory(
+        inventory
+    ) {
+    }
+
+    async function inspectZoneItems() {
+        doInspectZoneItems().then()
+    }
+
+    async function doInspectZoneItems() {
+        let data;
+        try {
+            data = await getData('api/inspectZoneItems?playerId=' + player.attributes.id);
+        } catch (e) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return;
+        }
+        if (data.error) {
+            lastMessage.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return;
+        }
+        onInspectZoneItems(data.inventory, data.zoneItems);
+    }
+
+    function onInspectZoneItems(
+        inventoryItems,
+        zoneItems
+    ) {
+        currentCellItems = zoneItems
+        showZoneItems.set(true)
+        inventory.set(inventoryItems)
+    }
+
+    function pickUpZoneItem(
+        event
+    ) {
+        doPickUpZoneItem(event.detail).then()
+    }
+
+    async function doPickUpZoneItem(
+        inputData
+    ) {
+        let data;
+        try {
+            data = await putData('api/pickUpZoneItem', {
+                playerId: player.attributes.id,
+                ...inputData
+            });
+        } catch (e) {
+            zoneItemsError.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return;
+        }
+        if (data.error) {
+            zoneItemsError.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return;
+        }
+        onPickUpZoneItem(data.inventory, data.zoneItems);
+    }
+
+    function onPickUpZoneItem(
+        inventoryItems,
+        zoneItems
+    ) {
+        currentCellItems = zoneItems
+        inventory.set(inventoryItems)
+    }
+
+    function dropItemToZone(
+        event
+    ) {
+        doDropItemToZone(event.detail).then()
+    }
+
+    async function doDropItemToZone(
+        inputData
+    ) {
+        let data;
+        try {
+            data = await putData('api/dropItemToZone', {
+                playerId: player.attributes.id,
+                ...inputData
+            });
+        } catch (e) {
+            zoneItemsError.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return false;
+        }
+        if (data.error) {
+            zoneItemsError.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
+            return false;
+        }
+        onDropItemToZone(data.inventory, data.zoneItems);
+    }
+
+    function onDropItemToZone(
+        inventoryItems,
+        zoneItems
+    ) {
+        currentCellItems = zoneItems
+        inventory.set(inventoryItems)
+    }
+
     async function getData(url) {
         // console.log('GET: ' + url);
         const response = await fetch(url, {
@@ -305,7 +454,8 @@
             <tr>
                 <td>Attack</td>
                 <td
-                >PickUp
+                        on:click={inspectZoneItems}
+                >PickUp /Drop
                 </td>
                 <td> ...</td>
                 <td> ...</td>
@@ -345,4 +495,11 @@
         on:signIn="{signIn}"
         on:signUp="{signUp}"
 ></SignIn>
+{/if}
+{#if $showZoneItems}
+<ZoneItems
+        on:pickUpZoneItem="{pickUpZoneItem}"
+        on:dropItemToZone="{dropItemToZone}"
+        zoneItems={currentCellItems}
+></ZoneItems>
 {/if}

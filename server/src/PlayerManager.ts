@@ -3,6 +3,8 @@ import {
 	ErrorCode,
 	GamePlayer,
 	IGamePlayerAttributes,
+	IInventoryRequest,
+	IInventoryResponse,
 	IResetPasswordRequest,
 	IResetPasswordResponse,
 	IResponse,
@@ -104,6 +106,35 @@ export class PlayerManager {
 	): Promise<IResponse | IResetPasswordResponse> {
 		// test
 		return null
+	}
+
+	getInventory(
+		request: IInventoryRequest
+	): IResponse | IInventoryResponse {
+		const playerId = request.playerId
+		if (!playerId
+			|| typeof playerId !== 'number') {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid player ID'
+				}
+			}
+		}
+
+		const player = this.players[request.playerId]
+		if (!player) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid player'
+				}
+			}
+		}
+
+		return {
+			inventory: player.inventory.items
+		}
 	}
 
 	private addPlayer(

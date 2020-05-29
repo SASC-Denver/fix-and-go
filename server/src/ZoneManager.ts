@@ -1,8 +1,17 @@
 import {
 	ErrorCode,
+	GameItem,
+	GameObjectType,
 	GamePlayer,
+	IDropItemRequest,
+	IDropItemResponse,
+	IGameItemAttributes,
+	IInspectItemsRequest,
+	IInspectItemsResponse,
 	IMoveRequest,
 	IMoveResponse,
+	IPickUpItemRequest,
+	IPickUpItemResponse,
 	IResponse,
 	IZoneUpdate,
 	IZoneUpdates,
@@ -179,4 +188,155 @@ export class ZoneManager {
 			}
 		}
 	}
+
+	inspectZoneItems(
+		request: IInspectItemsRequest
+	): IResponse | IInspectItemsResponse {
+		const player = this.testZone.objectsDirectory
+			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+
+		if (!player) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid player'
+				}
+			}
+		}
+
+		const items = this.testZone.itemLayout
+			[player.attributes.coordinates.y][player.attributes.coordinates.x]
+
+		return {
+			inventory: player.inventory.items,
+			zoneItems: items.map(item => item.attributes as IGameItemAttributes)
+		}
+	}
+
+	pickUpZoneItem(
+		request: IPickUpItemRequest
+	): IResponse | IPickUpItemResponse {
+		const player = this.testZone.objectsDirectory
+			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+
+		if (!player) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid player'
+				}
+			}
+		}
+
+		if (player.inventory.items.length >= player.inventory.maxSize) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Inventory is full'
+				}
+			}
+		}
+
+		const items = this.testZone.itemLayout
+			[player.attributes.coordinates.y][player.attributes.coordinates.x]
+
+		const matchingItems = items.filter(anItem =>
+			anItem.attributes.type === request.type
+			&& anItem.attributes.id === request.id)
+
+		if (matchingItems.length !== 1
+			|| !this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid Item'
+				}
+			}
+		}
+
+		const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
+			&& anItem.attributes.id === request.id))
+
+		this.testZone.itemLayout
+			[player.attributes.coordinates.y][player.attributes.coordinates.x]
+			= zoneItems
+
+		delete this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]
+
+		const item = matchingItems[0] as GameItem
+
+		player.inventory.addItem(item)
+
+		return {
+			inventory: player.inventory.items,
+			zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
+		}
+	}
+
+	dropItemToZone(
+		request: IDropItemRequest
+	): IResponse | IDropItemResponse {
+		const player = this.testZone.objectsDirectory
+			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+
+		if (!player) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Invalid player'
+				}
+			}
+		}
+
+		const items = this.testZone.itemLayout
+			[player.attributes.coordinates.y][player.attributes.coordinates.x]
+
+		if (items.length >= 30) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Map location is full'
+				}
+			}
+		}
+
+		const item = player.inventory.removeItem(request.type, request.id)
+
+		if (!item) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Item not in inventory'
+				}
+			}
+		}
+
+		item.attributes.coordinates = {
+			...player.attributes.coordinates
+		}
+
+		const addResult = this.testZone.add(item)
+
+		if (typeof addResult !== 'boolean') {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Item already on Map'
+				}
+			}
+		} else if (!addResult) {
+			return {
+				error: {
+					code: ErrorCode.INVALID_REQUEST,
+					description: 'Error placing item on Map'
+				}
+			}
+		}
+
+		return {
+			inventory: player.inventory.items,
+			zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
+		}
+	}
+
 }

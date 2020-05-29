@@ -78,3 +78,42 @@ export interface IMoveResponse
 		y: number
 	}
 }
+
+export interface IInventoryRequest
+	extends IRequest {
+}
+
+export interface IInventoryResponse {
+	inventory: IGameItemAttributes[]
+}
+
+export interface IInspectItemsRequest
+	extends IRequest {
+}
+
+export interface IInspectItemsResponse {
+	inventory: IGameItemAttributes[]
+	zoneItems: IGameItemAttributes[]
+}
+
+export interface IPickUpItemRequest
+	extends IRequest {
+	id: number
+	type: GameObjectType
+}
+
+export interface IPickUpItemResponse {
+	inventory: IGameItemAttributes[]
+	zoneItems: IGameItemAttributes[]
+}
+
+export interface IDropItemRequest
+	extends IRequest {
+	id: number
+	type: GameObjectType
+}
+
+export interface IDropItemResponse {
+	inventory: IGameItemAttributes[]
+	zoneItems: IGameItemAttributes[]
+}

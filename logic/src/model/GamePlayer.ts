@@ -1,8 +1,9 @@
-import {GameObjectType} from './game'
+import {GameObjectType}      from './game'
 import {
 	GameCharacter,
 	IGameCharacterAttributes
-}                       from './GameCharacter'
+}                            from './GameCharacter'
+import {IGameItemAttributes} from './GameItem'
 
 export interface IGamePlayerAttributes
 	extends IGameCharacterAttributes {

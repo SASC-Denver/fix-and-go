@@ -7,6 +7,7 @@ import {
 export interface IGameItemAttributes
 	extends IGameObjectAttributes {
 	type?: GameObjectType.ITEM
+	name: string
 }
 
 /**

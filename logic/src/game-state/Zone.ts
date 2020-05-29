@@ -208,7 +208,7 @@ export class Zone {
 		const coordinates = object.attributes.coordinates
 
 		if (object instanceof GameItem) {
-			this.itemLayout[coordinates.y][coordinates.x].push(object)
+			this.itemLayout[coordinates.y][coordinates.x].unshift(object)
 		} else if (!this.objectLayout
 			|| !this.objectLayout[coordinates.y]
 			|| this.objectLayout[coordinates.y][coordinates.x]) {

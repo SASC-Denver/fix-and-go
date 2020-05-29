@@ -30,7 +30,6 @@ fastify.register(require('fastify-cors'), {
 	}
 })
 
-console.log(__dirname);
 const path = require('path')
 fastify.register(require('fastify-static'), {
 	root: path.join(__dirname, 'public'),
@@ -90,6 +89,36 @@ fastify.get('/api/updates', async (
 	reply
 ) => {
 	return coordinator.getUpdates(request.query as any)
+})
+
+fastify.get('/api/getInventory', async (
+	request,
+	reply
+) => {
+	return playerManager.getInventory(request.query as any)
+})
+
+fastify.get('/api/inspectZoneItems', async (
+	request,
+	reply
+) => {
+	return zoneManager.inspectZoneItems(request.query as any)
+})
+
+// Declare a route
+fastify.put('/api/pickUpZoneItem', async (
+	request,
+	reply
+) => {
+	return zoneManager.pickUpZoneItem(request.body)
+})
+
+// Declare a route
+fastify.put('/api/dropItemToZone', async (
+	request,
+	reply
+) => {
+	return zoneManager.dropItemToZone(request.body)
 })
 
 function initGame(): void {

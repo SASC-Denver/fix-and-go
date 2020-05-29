@@ -25,15 +25,17 @@
             return '';
         }
 
-        switch (gameObject.attributes.type) {
+        const attributes = gameObject.attributes
+
+        switch (attributes.type) {
             case GameObjectType.BOSS:
                 return 'Boss' + getCoords(gameObject);
             case GameObjectType.ITEM:
-                return 'Item' + getCoords(gameObject);
+                return attributes.name + getCoords(gameObject);
             case GameObjectType.OBSTACLE:
                 return '^^^^^^' + getCoords(gameObject);
             case GameObjectType.PLAYER:
-                return gameObject.attributes.username + getCoords(gameObject);
+                return attributes.username + getCoords(gameObject);
             case GameObjectType.PORTAL:
                 return 'Portal' + getCoords(gameObject);
             case GameObjectType.STORE:
