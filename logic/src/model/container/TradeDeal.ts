@@ -21,13 +21,19 @@ export interface IExchangeSide {
 }
 
 export interface ITradeDealAttributes {
-	exchange: {
-		initiator: IExchangeSide
-		receiver: IExchangeSide
-	}
 	id: number
-	initiatorId: number
-	receiverId?: number
+	parties: {
+		initiator: {
+			id: number
+			offer: IExchangeSide
+			username: string
+		}
+		receiver?: {
+			id: number
+			offer: IExchangeSide
+			username: string
+		}
+	}
 	state: TradeDealState
 	storeInventory?: IGameItemAttributes[]
 }
@@ -52,19 +58,25 @@ export class TradeDeal {
 		}
 
 		this.attributes = {
-			exchange: {
+			id,
+			parties: {
 				initiator: {
-					coins: 0,
-					items: []
+					id: initiator.attributes.id,
+					offer: {
+						coins: 0,
+						items: []
+					},
+					username: initiator.attributes.username
 				},
 				receiver: {
-					coins: 0,
-					items: []
-				},
+					id: receiver.attributes.id,
+					offer: {
+						coins: 0,
+						items: []
+					},
+					username: receiver.attributes.username
+				}
 			},
-			id,
-			initiatorId: initiator.attributes.id,
-			receiverId: initiator.attributes.id,
 			state: TradeDealState.STARTED
 		}
 	}

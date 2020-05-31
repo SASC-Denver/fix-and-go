@@ -16,5 +16,4 @@ export * from './model/Obstacle';
 export * from './model/Portal';
 export * from './model/Store';
 export * from './utils/network';
-export * from './utils/tradeDeal';
 export * from './zones/TestZone';

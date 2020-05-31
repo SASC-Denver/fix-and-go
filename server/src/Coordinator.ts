@@ -57,6 +57,7 @@ export class Coordinator {
 
 	trackTime(): void {
 		this.zoneManager.update()
+		this.tradeManager.update()
 
 		const currentMillisecond = new Date().getTime()
 		this.currentSecond       = Math.floor(currentMillisecond / 1000)

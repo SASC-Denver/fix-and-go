@@ -1,91 +1,128 @@
 <script>
-    import {TradeDealChangeType} from "@fix-and-go/logic";
+    import {TradeDealChangeType, TradeDealState} from "@fix-and-go/logic";
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
     import {getItemRows, renderItem} from "../utils/items";
-    import {showZoneItems, zoneItemsError} from '../ui-state';
-    import Inventory from '../Inventory.svelte'
     import ActionPopover from './ActionPopover.svelte'
+    import Inventory from '../Inventory.svelte'
     import StoreInventory from './StoreInventory.svelte'
+    import {showZoneItems, tradeDeal, tradeDealError} from '../ui-state';
+    import {getTradeSide, isPlayerTheInitiator} from "../utils/tradeDeal";
 
-    export let yourOfferedItems = []
-    export let theirOfferedItems = []
+    export let player
 
     const dispatch = createEventDispatcher();
 
-    const showItemsUnsubscribe = showZoneItems.subscribe(doShowItems => {
-        zoneItemsError.set(null)
-    });
+    $: theirOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, false), 3, 4)
+    $: yourOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, true), 3, 4)
 
-    $: theirOfferedItemRows = getItemRows(theirOfferedItems, 3, 4)
-    $: yourOfferedItemRows = getItemRows(yourOfferedItems, 3, 4)
+    $: initiatedTradeWaitingForReply = $tradeDeal.state === TradeDealState.STARTED
+        && isPlayerTheInitiator($tradeDeal, player)
+    $: needToReplyTradeInvite = $tradeDeal.state === TradeDealState.STARTED
+        && !isPlayerTheInitiator($tradeDeal, player)
+
+    $: otherUsername = getTradeSide($tradeDeal, false, player).username
 
     onMount(async () => {
+        tradeDealError.set(null)
     })
 
     onDestroy(() => {
-        showItemsUnsubscribe();
     })
+
+    function getExchangeItems(
+        tradeDeal,
+        yourSide
+    ) {
+        return getTradeSide(tradeDeal, yourSide, player)
+    }
+
+    function accept(
+        tradeDeal
+    ) {
+        dispatch('tradeDealReply', {
+            accept: true,
+            tradeDealId: tradeDeal.id
+        })
+    }
+
+    function deny(
+        tradeDeal
+    ) {
+        dispatch('tradeDealReply', {
+            accept: false,
+            tradeDealId: tradeDeal.id
+        })
+    }
 
     let render = renderItem
 
     function removeYourOfferedItem(
-        item
+        item,
+        tradeDeal
     ) {
         if (!item) {
             return
         }
 
         dispatch('tradeDealChange', {
+            change: TradeDealChangeType.REMOVE_YOUR_ITEM,
             id: item.id,
+            tradeDealId: tradeDeal.id,
             type: item.type,
-            change: TradeDealChangeType.REMOVE_YOUR_ITEM
         });
     }
 
     function removeTheirOfferedItem(
-        item
+        item,
+        tradeDeal
     ) {
         if (!item) {
             return
         }
 
         dispatch('removeTheirOfferedItem', {
+            change: TradeDealChangeType.REMOVE_THEIR_ITEM,
             id: item.id,
+            tradeDealId: tradeDeal.id,
             type: item.type,
-            change: TradeDealChangeType.REMOVE_THEIR_ITEM
         });
     }
 
     function addYourOfferedItem(
-        item
+        item,
+        tradeDeal
     ) {
         if (!item) {
             return
         }
 
         dispatch('addYourOfferedItem', {
+            change: TradeDealChangeType.ADD_YOUR_ITEM,
             id: item.id,
+            tradeDealId: tradeDeal.id,
             type: item.type,
-            change: TradeDealChangeType.ADD_YOUR_ITEM
         });
     }
 
     function addTheirOfferedItem(
-        item
+        item,
+        tradeDeal
     ) {
         if (!item) {
             return
         }
 
         dispatch('addTheirOfferedItem', {
+            change: TradeDealChangeType.ADD_THEIR_ITEM,
             id: item.id,
+            tradeDealId: tradeDeal.id,
             type: item.type,
-            change: TradeDealChangeType.ADD_THEIR_ITEM
         });
     }
 
     function changeNumberOfYourOfferedCoins(
-        numberOfCoinsString
+        numberOfCoinsString,
+        tradeDeal,
     ) {
         const numberOfCoins = parseInt(numberOfCoinsString, 10)
         if (typeof numberOfCoins !== 'number') {
@@ -93,17 +130,26 @@
         }
 
         dispatch('tradeDealChange', {
+            change: TradeDealChangeType.CHANGE_YOUR_COINS,
             numberOfCoins,
-            change: TradeDealChangeType.CHANGE_YOUR_COINS
+            tradeDealId: tradeDeal.id
         });
     }
 
-    function cancel() {
-        dispatch('tradeDealCancel');
+    function cancel(
+        tradeDeal
+    ) {
+        dispatch('tradeDealCancel', {
+            tradeDealId: tradeDeal.id
+        });
     }
 
-    function commit() {
-        dispatch('tradeDealCommit');
+    function commit(
+        tradeDeal
+    ) {
+        dispatch('tradeDealCommit', {
+            tradeDealId: tradeDeal.id
+        });
     }
 
 </script>
@@ -142,18 +188,71 @@
 
 </style>
 
+{#if initiatedTradeWaitingForReply}
+<ActionPopover
+        maxWidth="400px"
+>
+    <div slot="header">
+        Trade request with "{otherUsername}"
+    </div>
+    <div slot="content">
+        Wating for "{otherUsername}" to accept your trade invitation.
+        {#if $tradeDealError}
+        <div
+                class="error"
+        >
+            {$tradeDealError.value}
+        </div>
+        {/if}
+    </div>
+    <div slot="actions">
+        <button
+                on:click="{event => cancel($tradeDeal)}"
+        >Cancel
+        </button>
+    </div>
+</ActionPopover>
+{:else if needToReplyTradeInvite}
+<ActionPopover
+        maxWidth="400px"
+>
+    <div slot="header">
+        Invitation to trade with "{otherUsername}"
+    </div>
+    <div slot="content">
+        "{otherUsername}" wants to trade with you.
+        {#if $tradeDealError}
+        <div
+                class="error"
+        >
+            {$tradeDealError.value}
+        </div>
+        {/if}
+    </div>
+    <div slot="actions">
+        <button
+                on:click="{event => accept($tradeDeal)}"
+        >Accept
+        </button>
+        <button
+                on:click="{event => deny($tradeDeal)}"
+        >Deny
+        </button>
+    </div>
+</ActionPopover>
+{:else}
 <ActionPopover
         maxWidth="900px"
 >
     <div slot="header">
-        Trade with Tester
+        Trade with "{otherUsername}"
     </div>
     <div slot="content">
-        {#if $zoneItemsError}
+        {#if $tradeDealError}
         <div
                 class="error"
         >
-            {$zoneItemsError.value}
+            {$tradeDealError.value}
         </div>
         {/if}
         <br>
@@ -171,7 +270,7 @@
                             {#each yourOfferedItemRows as yourOfferedItemRow}
                             <tr>
                                 {#each yourOfferedItemRow as yourOfferedItem}
-                                <td on:click|stopPropagation="{event => removeYourOfferedItem(yourOfferedItem)}">
+                                <td on:click|stopPropagation="{event => removeYourOfferedItem(yourOfferedItem, $tradeDeal)}">
                                     <div>
                                         {render(yourOfferedItem)}
                                     </div>
@@ -194,7 +293,7 @@
                             {#each theirOfferedItemRows as theirOfferedItemRow}
                             <tr>
                                 {#each theirOfferedItemRow as theirOfferedItem}
-                                <td on:click|stopPropagation="{event => removeTheirOfferedItem(theirOfferedItem)}">
+                                <td on:click|stopPropagation="{event => removeTheirOfferedItem(theirOfferedItem, $tradeDeal)}">
                                     <div>
                                         {render(theirOfferedItem)}
                                     </div>
@@ -210,7 +309,7 @@
                 <td>
                     Your Inventory
                     <Inventory
-                            on:selectInventoryItem={addYourOfferedItem}
+                            on:selectInventoryItem="{event => addYourOfferedItem($tradeDeal)}"
                     ></Inventory>
                     Your Purse: 123 coins
                     <br>
@@ -221,7 +320,7 @@
                 </td>
                 <td>
                     <StoreInventory
-                            on:selectInventoryItem={addTheirOfferedItem}
+                            on:selectInventoryItem="{event => addTheirOfferedItem($tradeDeal)}"
                     ></StoreInventory>
                 </td>
             </tr>
@@ -229,12 +328,13 @@
     </div>
     <div slot="actions">
         <button
-                on:click={commit}
+                on:click="{event => commit($tradeDeal)}"
         >Commit
         </button>
         <button
-                on:click={cancel}
+                on:click="{event => cancel($tradeDeal)}"
         >Cancel
         </button>
     </div>
 </ActionPopover>
+{/if}

@@ -129,24 +129,31 @@ export interface ITradeDealStartRequest
 	toPlayerId: number
 }
 
-export interface ITradeDealStartResponse
+export interface ITradeDealRequest
+	extends IRequest {
+	tradeDealId: number
+}
+
+export interface ITradeDealResponse
 	extends IResponse {
 	tradeDealId: number
+}
+
+export interface ITradeDealStartResponse
+	extends ITradeDealResponse {
 }
 
 export interface ITradeDealReplyRequest
-	extends IRequest {
-	tradeDealId: number
+	extends ITradeDealRequest {
+	accept: boolean
 }
 
 export interface ITradeDealReplyResponse
-	extends IResponse {
-	tradeDealId: number
+	extends ITradeDealResponse {
 }
 
 export interface ITradeDealChangeRequest
-	extends IRequest {
-	tradeDealId: number;
+	extends ITradeDealRequest {
 	coins?: number;
 	item?: {
 		id: number;
@@ -156,26 +163,21 @@ export interface ITradeDealChangeRequest
 }
 
 export interface ITradeDealChangeResponse
-	extends IResponse {
-	tradeDealId: number
+	extends ITradeDealResponse {
 }
 
 export interface ITradeDealCancelRequest
-	extends IRequest {
-	tradeDealId: number
+	extends ITradeDealRequest {
 }
 
 export interface ITradeDealCancelResponse
-	extends IResponse {
-	tradeDealId: number
+	extends ITradeDealResponse {
 }
 
 export interface ITradeDealCommitRequest
-	extends IRequest {
-	tradeDealId: number
+	extends ITradeDealRequest {
 }
 
 export interface ITradeDealCommitResponse
 	extends IResponse {
-	tradeDealId: number
 }

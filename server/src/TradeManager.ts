@@ -11,6 +11,8 @@ import {
 	ITradeDealCommitResponse,
 	ITradeDealReplyRequest,
 	ITradeDealReplyResponse,
+	ITradeDealRequest,
+	ITradeDealResponse,
 	ITradeDealStartRequest,
 	ITradeDealStartResponse,
 	ITradeDealUpdates,
@@ -48,6 +50,10 @@ export class TradeManager {
 			return error('Other player is not found in zone')
 		}
 
+		if (receiver.tradeDeal) {
+			return error(`${receiver.attributes.username} is already trading.`)
+		}
+
 		const initiatorCoords = initiator.attributes.coordinates
 		const receiverCoords  = receiver.attributes.coordinates
 
@@ -76,7 +82,23 @@ export class TradeManager {
 	tradeDealReply(
 		request: ITradeDealReplyRequest
 	): IResponse | ITradeDealReplyResponse {
-		return null
+		return this.commonInputSafe(request, (player: GamePlayer) => {
+			if (typeof request.accept !== 'boolean') {
+				return error('Must accept or decline to enter a Trade Deal')
+			}
+
+			const tradeDealAttributes = player.tradeDeal.attributes
+
+			if (request.accept) {
+				tradeDealAttributes.state = TradeDealState.IN_PROGRESS
+			} else {
+				this.doTradeDealCancel(player)
+			}
+
+			return {
+				tradeDealId: tradeDealAttributes.id
+			}
+		})
 	}
 
 	// Player changed terms of the trade.
@@ -90,27 +112,14 @@ export class TradeManager {
 	tradeDealCancel(
 		request: ITradeDealCancelRequest
 	): IResponse | ITradeDealCancelResponse {
-		const player = this.coordinator.playerManager
-			.players[request.playerId]
-		if (!player) {
-			return error('Invalid player')
-		}
+		return this.commonInputSafe(request, (player: GamePlayer) => {
+			const tradeDeal = player.tradeDeal
+			this.doTradeDealCancel(player)
 
-		const tradeDeal = player.tradeDeal
-
-		if (!tradeDeal) {
-			return error('Player is not in a trade deal')
-		}
-
-		if (request.tradeDealId !== tradeDeal.attributes.id) {
-			return error('Wrong Trade Deal Id')
-		}
-
-		this.doTradeDealCancel(player)
-
-		return {
-			tradeDealId: tradeDeal.attributes.id
-		}
+			return {
+				tradeDealId: tradeDeal.attributes.id
+			}
+		})
 	}
 
 	doTradeDealCancel(
@@ -142,10 +151,10 @@ export class TradeManager {
 		}
 	}
 
-	tradeDealSave<IR extends IResponse>(
+	tradeDealSafe<IR extends IResponse>(
 		player: GamePlayer,
 		callback: () => IResponse | IR
-	) {
+	): IResponse | IR {
 		let cancelTradeDeal = false
 		if (player.tradeDeal) {
 			switch (player.tradeDeal.attributes.state) {
@@ -164,6 +173,28 @@ export class TradeManager {
 				this.doTradeDealCancel(player)
 			}
 		}
+	}
+
+	private commonInputSafe<IReq extends ITradeDealRequest, IRes extends ITradeDealResponse>(
+		request: IReq,
+		callback: (player: GamePlayer) => IRes | IResponse
+	): IResponse | IRes {
+
+		const player = this.coordinator.playerManager
+			.players[request.playerId]
+		if (!player) {
+			return error('Invalid player')
+		}
+
+		if (!player.tradeDeal) {
+			return error('Player is not in a trade deal')
+		}
+
+		if (request.tradeDealId !== player.tradeDeal.attributes.id) {
+			return error('Wrong Trade Deal Id')
+		}
+
+		return callback(player)
 	}
 
 }

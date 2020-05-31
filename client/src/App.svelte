@@ -20,9 +20,11 @@
         showSignIn,
         showZoneItems,
         signInError,
+        tradeDeal,
         tradeDealError,
         zoneItemsError
     } from "./ui-state";
+    import {isPlayerTheInitiator} from "./utils/tradeDeal";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
@@ -33,8 +35,8 @@
     let objectAtSelection
     let player
     let testZone
-    let theirOfferedItems = []
-    let yourOfferedItems = []
+
+    $: showTradeDeal = !!$tradeDeal
 
     onMount(async () => {
         testZone = new Zone();
@@ -116,6 +118,23 @@
             player)
         if (data.chat.length) {
             lastChatBatch.set(data.chat);
+        }
+        if (data.tradeDeal) {
+            tradeDeal.set(data.tradeDeal)
+        } else {
+            tradeDeal.subscribe(lastTradeDeal => {
+                if (lastTradeDeal) {
+                    let otherPlayerUsername = lastTradeDeal.parties.initiator.username;
+                    if(isPlayerTheInitiator(lastTradeDeal, player)) {
+                        otherPlayerUsername = lastTradeDeal.parties.receiver.username;
+                    }
+                    lastMessage.set({
+                        eventId: ++eventCount,
+                        value: `Trade with "${otherPlayerUsername}" canceled`
+                    });
+                }
+                tradeDeal.set(null)
+            })()
         }
         lastUpdateSecond = data.currentSecond
         changeCount++
@@ -227,27 +246,24 @@
         inventory.set(data.inventory)
     }
 
-    function tradeDealStart() {
+
+    function tradeDealStart(
+        event
+    ) {
         if (!objectAtSelection
             || objectAtSelection.attributes.type !== GameObjectType.PLAYER) {
             return;
         }
-        doTradeDealStart(event.detail).then()
+        doTradeDealStart(objectAtSelection).then()
     }
 
     async function doTradeDealStart(
         toPlayer
     ) {
-        const data = await putData('api/tradeDealStart', {
+        await putData('api/tradeDealStart', {
             playerId: player.attributes.id,
             toPlayerId: toPlayer.attributes.id
         });
-        if (!data) {
-            return;
-        }
-
-        data.tradeDealId
-        // TODO: work here next
     }
 
     function tradeDealReply(
@@ -302,7 +318,7 @@
         const data = await putData('api/tradeDealCancel', {
             playerId: player.attributes.id,
             ...inputData
-        });
+        }, tradeDealError);
         if (!data) {
             return;
         }
@@ -322,7 +338,7 @@
         const data = await putData('api/tradeDealCommit', {
             playerId: player.attributes.id,
             ...inputData
-        });
+        }, tradeDealError);
         if (!data) {
             return;
         }
@@ -349,17 +365,7 @@
             });
             return null;
         }
-        if (data.error) {
-            switch (data.error.code) {
-                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
-                    // No message needed?
-                    return null;
-            }
-            errorMessageStore.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-
+        if (hasRemoteError(data, errorMessageStore)) {
             return null;
         }
 
@@ -391,21 +397,36 @@
             });
             return null;
         }
-        if (data.error) {
-            switch (data.error.code) {
-                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
-                    // No message needed?
-                    return null;
-            }
-            errorMessageStore.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-
+        if (hasRemoteError(data, errorMessageStore)) {
             return null;
         }
 
         return data;
+    }
+
+    function hasRemoteError(
+        data,
+        errorMessageStore
+    ) {
+        if (!data.error) {
+            return false;
+        }
+
+        let value = data.message
+        if (!value) {
+            value = data.error.description
+            switch (data.error.code) {
+                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
+                    // No message needed?
+                    return true;
+            }
+        }
+        errorMessageStore.set({
+            eventId: ++eventCount,
+            value
+        });
+
+        return true;
     }
 </script>
 
@@ -523,12 +544,12 @@
         zoneItems={currentCellItems}
 ></ZoneItems>
 {/if}
-{#if $showTradeDeal}
+{#if showTradeDeal}
 <TradeDeal
-        theirOfferedItems="{theirOfferedItems}"
-        yourOfferedItems="{yourOfferedItems}"
+        player="{player}"
         on:tradeDealCancel="{tradeDealCancel}"
         on:tradeDealChange="{tradeDealChange}"
         on:tradeDealCommit="{tradeDealCommit}"
+        on:tradeDealReply="{tradeDealReply}"
 ></TradeDeal>
 {/if}

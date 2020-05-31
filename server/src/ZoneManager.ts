@@ -81,7 +81,7 @@ export class ZoneManager {
 			return error('Invalid move')
 		}
 
-		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
 			player.lastSecondOf.move = this.coordinator.currentSecond
 
 			return {
@@ -161,7 +161,7 @@ export class ZoneManager {
 			return error('Invalid player')
 		}
 
-		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
 			const items = this.testZone.itemLayout
 				[player.attributes.coordinates.y][player.attributes.coordinates.x]
 
@@ -198,7 +198,7 @@ export class ZoneManager {
 			return error('Invalid Item')
 		}
 
-		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
 			const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
 				&& anItem.attributes.id === request.id))
 
@@ -254,7 +254,7 @@ export class ZoneManager {
 			return error('Error placing item on Map')
 		}
 
-		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
 			return {
 				inventory: player.inventory.items,
 				zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
