@@ -1,9 +1,9 @@
-import {GameObjectType}      from './game'
+import {TradeDeal}      from './container/TradeDeal'
+import {GameObjectType} from './game'
 import {
 	GameCharacter,
 	IGameCharacterAttributes
-}                            from './GameCharacter'
-import {IGameItemAttributes} from './GameItem'
+}                       from './GameCharacter'
 
 export interface IGamePlayerAttributes
 	extends IGameCharacterAttributes {
@@ -24,6 +24,8 @@ export class GamePlayer
 	} = {
 		move: 0
 	}
+
+	tradeDeal: TradeDeal
 
 	constructor(
 		attributes: IGamePlayerAttributes

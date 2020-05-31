@@ -1,5 +1,6 @@
 import {
 	CredentialsChecker,
+	error,
 	ErrorCode,
 	GamePlayer,
 	IGamePlayerAttributes,
@@ -33,13 +34,13 @@ export class PlayerManager {
 	): Promise<IResponse | ISignUpResponse> {
 		// console.log(signUpRequest)
 
-		const error = this.credentialsChecker.serverCheckCredentials(
+		const credentialsError = this.credentialsChecker.serverCheckCredentials(
 			signUpRequest.username, signUpRequest.encodedEmail,
 			signUpRequest.encodedPassword)
 
-		if (error) {
+		if (credentialsError) {
 			return {
-				error
+				error: credentialsError
 			}
 		}
 
@@ -63,13 +64,8 @@ export class PlayerManager {
 			attributes.id = user.id
 
 			return this.addPlayer(user)
-		} catch (error) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: error.message
-				}
-			}
+		} catch (anError) {
+			return error(anError.message)
 		}
 	}
 
@@ -81,21 +77,11 @@ export class PlayerManager {
 		const user = await this.userDao.findByEncodedEmail(signInRequest.encodedEmail)
 
 		if (!user) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'No user found'
-				}
-			}
+			return error('No user found')
 		}
 
 		if (signInRequest.encodedPassword !== user.encodedPassword) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Password does not match'
-				}
-			}
+			return error('Password does not match')
 		}
 
 		return this.addPlayer(user)
@@ -111,25 +97,16 @@ export class PlayerManager {
 	getInventory(
 		request: IInventoryRequest
 	): IResponse | IInventoryResponse {
-		const playerId = request.playerId
+		// console.log(JSON.stringify(request, null, 2))
+		const playerId = parseInt(request.playerId as any, 10)
 		if (!playerId
 			|| typeof playerId !== 'number') {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player ID'
-				}
-			}
+			return error('Invalid player ID')
 		}
 
 		const player = this.players[request.playerId]
 		if (!player) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player'
-				}
-			}
+			return error('Invalid player')
 		}
 
 		return {

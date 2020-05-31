@@ -1,9 +1,10 @@
+import {Inventory}      from './container/Inventory'
+import {Purse}          from './container/Purse'
 import {GameObjectType} from './game'
 import {
 	GameObject,
 	IGameObjectAttributes
 }                       from './GameObject'
-import {Inventory}      from './Inventory'
 
 export interface IGameCharacterAttributes
 	extends IGameObjectAttributes {
@@ -18,9 +19,10 @@ export interface IGameCharacterAttributes
  */
 export class GameCharacter
 	extends GameObject {
-	inventory: Inventory = new Inventory()
 
 	attributes: IGameCharacterAttributes
+	inventory: Inventory = new Inventory()
+	purse: Purse         = new Purse()
 
 	visionRange: {
 		high: {

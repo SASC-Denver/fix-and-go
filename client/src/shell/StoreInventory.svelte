@@ -1,7 +1,7 @@
 <script>
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
-    import {getItemRows, renderItem} from "./utils/items";
-    import {inventory} from "./ui-state";
+    import {getItemRows, renderItem} from "../utils/items";
+    import {storeInventory} from "../ui-state";
 
     const dispatch = createEventDispatcher();
 
@@ -9,7 +9,7 @@
 
     $: itemRows = getItemRows(inventoryItems, 5, 4);
 
-    const inventoryUnsubscribe = inventory.subscribe(items => {
+    const inventoryUnsubscribe = storeInventory.subscribe(items => {
         inventoryItems = items;
     });
 

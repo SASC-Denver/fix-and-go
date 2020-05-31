@@ -1,6 +1,7 @@
 <script>
     import {GameObjectType,} from '@fix-and-go/logic'
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
+    import {mapSelection} from "./ui-state";
 
     const dispatch = createEventDispatcher();
 
@@ -8,13 +9,24 @@
     export let player;
     export let zone;
 
-    $: mapView = getMapView(zone, player, changeCount);
+    let selectionCount = 0;
+
+    let selection = null
+
+    $: mapView = getMapView(zone, player, changeCount, selectionCount);
 
     onMount(() => {
     });
 
     onDestroy(() => {
     });
+
+    function isSelected(
+        x,
+        y
+    ) {
+        return selection && selection.viewX === x && selection.viewY === y
+    }
 
     function render(
         gameObject
@@ -97,13 +109,22 @@
         let newX = player.attributes.coordinates.x + changeInX;
         let newY = player.attributes.coordinates.y + changeInY;
 
-        if (zone.isMoveWithinDimensions(newX, newY)) {
-            dispatch('move', {
-                positionChange: {
-                    x: changeInX,
-                    y: changeInY
-                }
-            })
+        if (zone.isPositionWithinDimensions(newX, newY)) {
+            if (zone.isPositionOccupied(newX, newY)) {
+                selection = {
+                    viewX,
+                    viewY
+                };
+                selectionCount++;
+                mapSelection.set(mapView[selection.viewX][selection.viewY]);
+            } else {
+                dispatch('move', {
+                    positionChange: {
+                        x: changeInX,
+                        y: changeInY
+                    }
+                });
+            }
         }
     }
 
@@ -149,11 +170,11 @@
 
                     const gameObject = zone.objectLayout[y][x];
 
-                    if(gameObject) {
+                    if (gameObject) {
                         view[viewY][viewX] = gameObject;
                     } else {
                         const gameItems = zone.itemLayout[y][x];
-                        if(gameItems.length) {
+                        if (gameItems.length) {
                             view[viewY][viewX] = gameItems[0];
                         } else {
                             view[viewY][viewX] = null;
@@ -164,6 +185,16 @@
                 }
             }
             viewY++;
+        }
+
+        if (selection) {
+            const gameObjectAtSelection = view[selection.viewY][selection.viewX];
+            if (!gameObjectAtSelection) {
+                selection = null;
+            }
+            mapSelection.set(gameObjectAtSelection);
+        } else {
+            mapSelection.set(null);
         }
 
         return view;
@@ -188,13 +219,20 @@
         text-align: center;
         word-break: break-all;
     }
+
+    .map td.selected {
+        border: 2px solid black;
+    }
 </style>
 
 <table class="map">
     {#each mapView as mapViewRow, viewY}
     <tr>
         {#each mapViewRow as mapObject, viewX}
-        <td on:click="{event => handleClick(viewX, viewY)}">
+        <td
+                class:selected="{selection && selection.viewX === viewX && selection.viewY === viewY}"
+                on:click="{event => handleClick(viewX, viewY)}"
+        >
             <div>
                 {render(mapObject)}
             </div>

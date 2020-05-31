@@ -2,8 +2,8 @@ import {
 	GameObjectType,
 	IGameObject,
 	IObjectDirectory,
-}                            from './game'
-import {IGameItemAttributes} from './GameItem'
+}                            from '../game'
+import {IGameItemAttributes} from '../GameItem'
 
 /**
  * An inventory of objects for a player or a store.

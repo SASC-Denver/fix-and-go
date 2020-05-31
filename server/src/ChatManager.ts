@@ -1,5 +1,5 @@
 import {
-	ErrorCode,
+	error,
 	IChatRequest,
 	IChatSecondUpdateResponse,
 	IResponse
@@ -19,7 +19,7 @@ export class ChatManager {
 	set coordinator(
 		coordinator: Coordinator
 	) {
-		this.recentChat = [{
+		this.recentChat     = [{
 			messages: [],
 			second: coordinator.currentSecond,
 		}]
@@ -35,12 +35,7 @@ export class ChatManager {
 		if (typeof data.playerId !== 'number'
 			|| typeof data.text !== 'string'
 			|| !players[data.playerId]) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid request'
-				}
-			}
+			return error('Invalid request')
 		}
 		const player = players[data.playerId]
 

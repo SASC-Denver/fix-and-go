@@ -6,12 +6,14 @@ import {
 	startDb
 }                      from './db/DbDriver'
 import {PlayerManager} from './PlayerManager'
+import {TradeManager}  from './TradeManager'
 import {ZoneManager}   from './ZoneManager'
 
 const fastify = fastifyLib({logger: false})
 let chatManager: ChatManager
 let coordinator: Coordinator
 let playerManager: PlayerManager
+let tradeManager: TradeManager
 let zoneManager: ZoneManager
 
 fastify.register(require('fastify-cors'), {
@@ -33,14 +35,6 @@ fastify.register(require('fastify-cors'), {
 const path = require('path')
 fastify.register(require('fastify-static'), {
 	root: path.join(__dirname, 'public'),
-})
-
-// Declare a route
-fastify.get('/api/hello', async (
-	request,
-	reply
-) => {
-	return {hello: 'world'}
 })
 
 // Declare a route
@@ -121,13 +115,56 @@ fastify.put('/api/dropItemToZone', async (
 	return zoneManager.dropItemToZone(request.body)
 })
 
+fastify.put('/api/tradeDealStart', async (
+	request,
+	reply
+) => {
+	// Player initiated a trade (with another player or store).
+	return tradeManager.tradeDealStart(request.body)
+})
+
+fastify.put('/api/tradeDealReply', async (
+	request,
+	reply
+) => {
+	// Player replied to initial trade deal request (yes/now).
+	return tradeManager.tradeDealReply(request.body)
+})
+
+fastify.put('/api/tradeDealChange', async (
+	request,
+	reply
+) => {
+	// Player changed terms of the trade.
+	return tradeManager.tradeDealChange(request.body)
+})
+
+fastify.put('/api/tradeDealCancel', async (
+	request,
+	reply
+) => {
+	// Player cancelled the trade.
+	return tradeManager.tradeDealCancel(request.body)
+})
+
+fastify.put('/api/tradeDealCommit', async (
+	request,
+	reply
+) => {
+	// Player committed to the trade.
+	return tradeManager.tradeDealCommit(request.body)
+})
+
 function initGame(): void {
 	chatManager               = new ChatManager()
-	zoneManager               = new ZoneManager()
 	playerManager             = new PlayerManager()
-	coordinator               = new Coordinator(chatManager, playerManager, zoneManager)
+	tradeManager              = new TradeManager()
+	zoneManager               = new ZoneManager()
+	coordinator               = new Coordinator(
+		chatManager, playerManager, tradeManager, zoneManager)
 	chatManager.coordinator   = coordinator
 	playerManager.coordinator = coordinator
+	tradeManager.coordinator  = coordinator
 	zoneManager.coordinator   = coordinator
 }
 

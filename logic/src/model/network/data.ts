@@ -1,3 +1,4 @@
+import {TradeDealChangeType}   from '../..'
 import {GameObjectType}        from '../game'
 import {IGameItemAttributes}   from '../GameItem'
 import {IGamePlayerAttributes} from '../GamePlayer'
@@ -57,7 +58,8 @@ export interface IChatRequest
 	text: string
 }
 
-export interface IChatMessageResponse {
+export interface IChatMessageResponse
+	extends IResponse {
 	id: number
 	text: string
 	username: string
@@ -83,7 +85,8 @@ export interface IInventoryRequest
 	extends IRequest {
 }
 
-export interface IInventoryResponse {
+export interface IInventoryResponse
+	extends IResponse {
 	inventory: IGameItemAttributes[]
 }
 
@@ -91,7 +94,8 @@ export interface IInspectItemsRequest
 	extends IRequest {
 }
 
-export interface IInspectItemsResponse {
+export interface IInspectItemsResponse
+	extends IResponse {
 	inventory: IGameItemAttributes[]
 	zoneItems: IGameItemAttributes[]
 }
@@ -102,7 +106,8 @@ export interface IPickUpItemRequest
 	type: GameObjectType
 }
 
-export interface IPickUpItemResponse {
+export interface IPickUpItemResponse
+	extends IResponse {
 	inventory: IGameItemAttributes[]
 	zoneItems: IGameItemAttributes[]
 }
@@ -113,7 +118,64 @@ export interface IDropItemRequest
 	type: GameObjectType
 }
 
-export interface IDropItemResponse {
+export interface IDropItemResponse
+	extends IResponse {
 	inventory: IGameItemAttributes[]
 	zoneItems: IGameItemAttributes[]
+}
+
+export interface ITradeDealStartRequest
+	extends IRequest {
+	toPlayerId: number
+}
+
+export interface ITradeDealStartResponse
+	extends IResponse {
+	tradeDealId: number
+}
+
+export interface ITradeDealReplyRequest
+	extends IRequest {
+	tradeDealId: number
+}
+
+export interface ITradeDealReplyResponse
+	extends IResponse {
+	tradeDealId: number
+}
+
+export interface ITradeDealChangeRequest
+	extends IRequest {
+	tradeDealId: number;
+	coins?: number;
+	item?: {
+		id: number;
+		type: GameObjectType.ITEM;
+	}
+	type: TradeDealChangeType;
+}
+
+export interface ITradeDealChangeResponse
+	extends IResponse {
+	tradeDealId: number
+}
+
+export interface ITradeDealCancelRequest
+	extends IRequest {
+	tradeDealId: number
+}
+
+export interface ITradeDealCancelResponse
+	extends IResponse {
+	tradeDealId: number
+}
+
+export interface ITradeDealCommitRequest
+	extends IRequest {
+	tradeDealId: number
+}
+
+export interface ITradeDealCommitResponse
+	extends IResponse {
+	tradeDealId: number
 }

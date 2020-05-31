@@ -9,7 +9,7 @@ import {
 	GameObject,
 	IGameObjectAttributes
 }                  from './GameObject'
-import {Inventory} from './Inventory'
+import {Inventory} from './container/Inventory'
 
 export interface IStoreAttributes
 	extends IGameObjectAttributes {

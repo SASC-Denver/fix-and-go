@@ -252,19 +252,26 @@ export class Zone {
 		throw new Error('Not implemented')
 	}
 
-	isMoveWithinDimensions(
-		newX: number,
-		newY: number
-	) {
+	isPositionWithinDimensions(
+		x: number,
+		y: number
+	): boolean {
 
-		if (newX < 0 || newY < 0) {
+		if (x < 0 || y < 0) {
 			return false
 		}
-		if (newX >= this.dimensions.x || newY >= this.dimensions.y) {
+		if (x >= this.dimensions.x || y >= this.dimensions.y) {
 			return false
 		}
 
 		return true
+	}
+
+	isPositionOccupied(
+		x: number,
+		y: number
+	): boolean {
+		return !!this.objectLayout[y][x]
 	}
 
 	/**
@@ -281,7 +288,7 @@ export class Zone {
 		newX: number,
 		newY: number
 	): boolean {
-		if (!this.isMoveWithinDimensions(newX, newY)) {
+		if (!this.isPositionWithinDimensions(newX, newY)) {
 			return false
 		}
 

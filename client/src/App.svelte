@@ -1,22 +1,26 @@
 <script>
-    import {ErrorCode, GamePlayer, Zone} from '@fix-and-go/logic'
+    import {ErrorCode, GameObjectType, GamePlayer, Zone} from '@fix-and-go/logic'
     import {onDestroy, onMount} from 'svelte'
     import SignIn from './shell/SignIn.svelte'
     import Chat from './Chat.svelte'
     import Equipment from './Equipment.svelte'
     import Events from './Events.svelte'
     import Inventory from './Inventory.svelte'
+    import TradeDeal from './shell/TradeDeal.svelte'
     import ZoneItems from './shell/ZoneItems.svelte'
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
     import {
-        getCredentials, inventory,
+        getCredentials,
+        inventory,
         lastChatBatch,
         lastMessage,
+        mapSelection,
         setCredentials,
         showSignIn,
         showZoneItems,
         signInError,
+        tradeDealError,
         zoneItemsError
     } from "./ui-state";
     // import TextToast from './shell/TextToast.svelte'
@@ -25,8 +29,12 @@
     let currentCellItems = []
     let eventCount = 0
     let lastUpdateSecond = 0
+    let mapSelectionUnsubscribe
+    let objectAtSelection
     let player
     let testZone
+    let theirOfferedItems = []
+    let yourOfferedItems = []
 
     onMount(async () => {
         testZone = new Zone();
@@ -39,6 +47,10 @@
                 showSignIn.set(true);
             }
         }
+
+        mapSelectionUnsubscribe = mapSelection.subscribe(object =>
+            objectAtSelection = object)
+
         // textToastUnsubscribe = stateOfTextToast.subscribe(
         // 	value => {
         // 		lastTextToast = value
@@ -60,66 +72,22 @@
     }
 
     onDestroy(() => {
+        mapSelectionUnsubscribe()
         // textToastUnsubscribe()
     })
 
     function handleMove(moveEvent) {
-        move(moveEvent.detail.positionChange).then()
+        putData('api/move', {
+            playerId: player.attributes.id,
+            positionChange: moveEvent.detail.positionChange
+        }).then()
     }
 
     function handleCreateChatMessage(chatEvent) {
-        chat(chatEvent.detail.text).then()
-    }
-
-    async function move(positionChange) {
-        let data = null
-        try {
-            data = await putData('api/move', {
-                playerId: player.attributes.id,
-                positionChange
-            });
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
-            return;
-        }
-        if (data.error) {
-            switch (data.error.code) {
-                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
-                    // No message needed?
-                    return;
-            }
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-        }
-    }
-
-    async function chat(
-        text
-    ) {
-        let data = null
-        try {
-            data = await putData('api/chat', {
-                playerId: player.attributes.id,
-                text
-            });
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
-            return;
-        }
-        if (data.error) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-        }
+        putData('api/chat', {
+            playerId: player.attributes.id,
+            text: chatEvent.detail.text
+        }).then()
     }
 
     async function updateFromServer() {
@@ -141,24 +109,16 @@
     }
 
     async function getUpdates() {
-        let data
-        try {
-            data = await getData('api/updates?playerId=' + player.attributes.id
-                + '&lastUpdateSecond=' + lastUpdateSecond);
-            testZone.updateObjects(data.zone.dimensions,
-                data.zone.updates,
-                player)
-            if (data.chat.length) {
-                lastChatBatch.set(data.chat);
-            }
-            lastUpdateSecond = data.currentSecond
-            changeCount++
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
+        const data = await getData('api/updates?playerId=' + player.attributes.id
+            + '&lastUpdateSecond=' + lastUpdateSecond);
+        testZone.updateObjects(data.zone.dimensions,
+            data.zone.updates,
+            player)
+        if (data.chat.length) {
+            lastChatBatch.set(data.chat);
         }
+        lastUpdateSecond = data.currentSecond
+        changeCount++
     }
 
     function signIn(event) {
@@ -168,21 +128,9 @@
     async function doSignIn(
         inputData
     ) {
-        let data;
-        try {
-            data = await putData('api/signIn', inputData);
-        } catch (e) {
-            signInError.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
-            return false;
-        }
-        if (data.error) {
-            signInError.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
+        const data = await putData('api/signIn', inputData, signInError);
+
+        if (!data) {
             return false;
         }
 
@@ -190,7 +138,7 @@
         onSignIn(data.attributes);
         showSignIn.set(false);
 
-        return true
+        return true;
     }
 
     function signUp(event) {
@@ -200,21 +148,8 @@
     async function doSignUp(
         inputData
     ) {
-        let data;
-        try {
-            data = await putData('api/signUp', inputData);
-        } catch (e) {
-            signInError.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
-            return false;
-        }
-        if (data.error) {
-            signInError.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
+        const data = await putData('api/signUp', inputData, signInError);
+        if (!data) {
             return false;
         }
         setCredentials(inputData);
@@ -229,29 +164,11 @@
     }
 
     async function doGetInventory() {
-        let data;
-        try {
-            data = await getData('api/getInventory?playerId=' + player.attributes.id);
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
+        const data = await getData('api/getInventory?playerId=' + player.attributes.id);
+        if (!data) {
             return;
         }
-        if (data.error) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-            return;
-        }
-        onGetInventory(data.inventory);
-    }
-
-    function onGetInventory(
-        inventory
-    ) {
+        inventory.set(data.inventory);
     }
 
     async function inspectZoneItems() {
@@ -259,33 +176,13 @@
     }
 
     async function doInspectZoneItems() {
-        let data;
-        try {
-            data = await getData('api/inspectZoneItems?playerId=' + player.attributes.id);
-        } catch (e) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
+        const data = await getData('api/inspectZoneItems?playerId=' + player.attributes.id);
+        if (!data) {
             return;
         }
-        if (data.error) {
-            lastMessage.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-            return;
-        }
-        onInspectZoneItems(data.inventory, data.zoneItems);
-    }
-
-    function onInspectZoneItems(
-        inventoryItems,
-        zoneItems
-    ) {
-        currentCellItems = zoneItems
+        currentCellItems = data.zoneItems
+        inventory.set(data.inventory)
         showZoneItems.set(true)
-        inventory.set(inventoryItems)
     }
 
     function pickUpZoneItem(
@@ -297,35 +194,16 @@
     async function doPickUpZoneItem(
         inputData
     ) {
-        let data;
-        try {
-            data = await putData('api/pickUpZoneItem', {
-                playerId: player.attributes.id,
-                ...inputData
-            });
-        } catch (e) {
-            zoneItemsError.set({
-                eventId: ++eventCount,
-                value: 'Connection lost'
-            });
+        const data = await putData('api/pickUpZoneItem', {
+            playerId: player.attributes.id,
+            ...inputData
+        }, zoneItemsError);
+        if (!data) {
             return;
         }
-        if (data.error) {
-            zoneItemsError.set({
-                eventId: ++eventCount,
-                value: data.error.description
-            });
-            return;
-        }
-        onPickUpZoneItem(data.inventory, data.zoneItems);
-    }
 
-    function onPickUpZoneItem(
-        inventoryItems,
-        zoneItems
-    ) {
-        currentCellItems = zoneItems
-        inventory.set(inventoryItems)
+        currentCellItems = data.zoneItems
+        inventory.set(data.inventory)
     }
 
     function dropItemToZone(
@@ -337,58 +215,197 @@
     async function doDropItemToZone(
         inputData
     ) {
-        let data;
+        const data = await putData('api/dropItemToZone', {
+            playerId: player.attributes.id,
+            ...inputData
+        }, zoneItemsError);
+        if (!data) {
+            return;
+        }
+
+        currentCellItems = data.zoneItems
+        inventory.set(data.inventory)
+    }
+
+    function tradeDealStart() {
+        if (!objectAtSelection
+            || objectAtSelection.attributes.type !== GameObjectType.PLAYER) {
+            return;
+        }
+        doTradeDealStart(event.detail).then()
+    }
+
+    async function doTradeDealStart(
+        toPlayer
+    ) {
+        const data = await putData('api/tradeDealStart', {
+            playerId: player.attributes.id,
+            toPlayerId: toPlayer.attributes.id
+        });
+        if (!data) {
+            return;
+        }
+
+        data.tradeDealId
+        // TODO: work here next
+    }
+
+    function tradeDealReply(
+        event
+    ) {
+        doTradeDealReply(event.detail).then()
+    }
+
+    async function doTradeDealReply(
+        inputData
+    ) {
+        const data = await putData('api/tradeDealReply', {
+            playerId: player.attributes.id,
+            ...inputData
+        }, tradeDealError);
+        if (!data) {
+            return;
+        }
+
+        // TODO: implement
+    }
+
+    function tradeDealChange(
+        event
+    ) {
+        doTradeDealChange(event.detail).then()
+    }
+
+    async function doTradeDealChange(
+        inputData
+    ) {
+        const data = await putData('api/tradeDealChange', {
+            playerId: player.attributes.id,
+            ...inputData
+        }, tradeDealError);
+        if (!data) {
+            return;
+        }
+
+        // TODO: implement
+    }
+
+    function tradeDealCancel(
+        event
+    ) {
+        doTradeDealCancel(event.detail).then()
+    }
+
+    async function doTradeDealCancel(
+        inputData
+    ) {
+        const data = await putData('api/tradeDealCancel', {
+            playerId: player.attributes.id,
+            ...inputData
+        });
+        if (!data) {
+            return;
+        }
+
+        // TODO: implement
+    }
+
+    function tradeDealCommit(
+        event
+    ) {
+        doTradeDealCommit(event.detail).then()
+    }
+
+    async function doTradeDealCommit(
+        inputData
+    ) {
+        const data = await putData('api/tradeDealCommit', {
+            playerId: player.attributes.id,
+            ...inputData
+        });
+        if (!data) {
+            return;
+        }
+
+        // TODO: implement
+    }
+
+    async function getData(
+        url,
+        errorMessageStore = lastMessage
+    ) {
+        let data = null
         try {
-            data = await putData('api/dropItemToZone', {
-                playerId: player.attributes.id,
-                ...inputData
+            // console.log('GET: ' + url);
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
             });
+            data = await response.json();
         } catch (e) {
-            zoneItemsError.set({
+            errorMessageStore.set({
                 eventId: ++eventCount,
                 value: 'Connection lost'
             });
-            return false;
+            return null;
         }
         if (data.error) {
-            zoneItemsError.set({
+            switch (data.error.code) {
+                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
+                    // No message needed?
+                    return null;
+            }
+            errorMessageStore.set({
                 eventId: ++eventCount,
                 value: data.error.description
             });
-            return false;
+
+            return null;
         }
-        onDropItemToZone(data.inventory, data.zoneItems);
+
+        return data;
     }
 
-    function onDropItemToZone(
-        inventoryItems,
-        zoneItems
+    async function putData(
+        url,
+        inputData,
+        errorMessageStore = lastMessage
     ) {
-        currentCellItems = zoneItems
-        inventory.set(inventoryItems)
-    }
+        let data = null
+        try {
+            // console.log('PUT: ' + url);
+            // console.log(JSON.stringify(data, null, 2));
+            const response = await fetch(url, {
+                method: 'PUT',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(inputData)
+            });
+            data = await response.json();
+        } catch (e) {
+            errorMessageStore.set({
+                eventId: ++eventCount,
+                value: 'Connection lost'
+            });
+            return null;
+        }
+        if (data.error) {
+            switch (data.error.code) {
+                case ErrorCode.REQUESTING_TOO_FREQUENTLY:
+                    // No message needed?
+                    return null;
+            }
+            errorMessageStore.set({
+                eventId: ++eventCount,
+                value: data.error.description
+            });
 
-    async function getData(url) {
-        // console.log('GET: ' + url);
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-        });
-        return response.json();
-    }
+            return null;
+        }
 
-    async function putData(url, data) {
-        // console.log('PUT: ' + url);
-        // console.log(JSON.stringify(data, null, 2));
-        const response = await fetch(url, {
-            method: 'PUT',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        return response.json();
+        return data;
     }
 </script>
 
@@ -452,7 +469,10 @@
     <div class="actions">
         <table>
             <tr>
-                <td>Attack</td>
+                <td
+                        on:click="{tradeDealStart}"
+                >Trade
+                </td>
                 <td
                         on:click={inspectZoneItems}
                 >PickUp /Drop
@@ -476,10 +496,10 @@
     <main>
         <section class="middle-left">
             <Map
-                    on:move={handleMove}
-                    changeCount={changeCount}
-                    player={player}
-                    zone={testZone}
+                    changeCount="{changeCount}"
+                    on:move="{handleMove}"
+                    player="{player}"
+                    zone="{testZone}"
             ></Map>
         </section>
         <aside class="middle-right">
@@ -502,4 +522,13 @@
         on:dropItemToZone="{dropItemToZone}"
         zoneItems={currentCellItems}
 ></ZoneItems>
+{/if}
+{#if $showTradeDeal}
+<TradeDeal
+        theirOfferedItems="{theirOfferedItems}"
+        yourOfferedItems="{yourOfferedItems}"
+        on:tradeDealCancel="{tradeDealCancel}"
+        on:tradeDealChange="{tradeDealChange}"
+        on:tradeDealCommit="{tradeDealCommit}"
+></TradeDeal>
 {/if}

@@ -1,5 +1,5 @@
 import {
-	ErrorCode,
+	error,
 	GameItem,
 	GameObjectType,
 	GamePlayer,
@@ -37,95 +37,57 @@ export class ZoneManager {
 		// console.log(data)
 
 		if (typeof data !== 'object') {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid request'
-				}
-			}
+			return error('Invalid request')
 		}
 		// console.log('data.playerId: ' + data.playerId + ', ' + (typeof data.playerId !== 'number'))
 
 		const players = this.coordinator.playerManager.players
 		if (typeof data.playerId !== 'number'
 			|| !players[data.playerId]) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player Id'
-				}
-			}
+			return error('Invalid player Id')
 		}
 
 		const player = players[data.playerId]
 		if (player.lastSecondOf.move === this.coordinator.currentSecond) {
-			return {
-				error: {
-					code: ErrorCode.REQUESTING_TOO_FREQUENTLY,
-					description: 'Moving too quickly'
-				}
-			}
+			return error('Moving too quickly')
 		}
 
 		if (typeof data.positionChange !== 'object'
 			|| typeof data.positionChange.x !== 'number'
 			|| typeof data.positionChange.y !== 'number') {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid move to coordinates'
-				}
-			}
+			return error('Invalid move to coordinates')
 		}
 
 		const changeInX = data.positionChange.x
 		const changeInY = data.positionChange.y
 
 		if (changeInX < -1 || changeInX > 1) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid X coordinate change'
-				}
-			}
+			return error('Invalid X coordinate change')
 		}
 
 		if (changeInX < -1 || changeInX > 1) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid Y coordinate change'
-				}
-			}
+			return error('Invalid Y coordinate change')
 		}
 
 		if (changeInX === 0 && changeInY === 0) {
 			// That's where the Player is
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'No move needed'
-				}
-			}
+			return error('No move needed')
 		}
 
 		const newX = player.attributes.coordinates.x + changeInX
 		const newY = player.attributes.coordinates.y + changeInY
 
 		if (!this.testZone.moveObject(player, newX, newY)) {
+			return error('Invalid move')
+		}
+
+		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+			player.lastSecondOf.move = this.coordinator.currentSecond
+
 			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid move'
-				}
-			}
-		}
-
-		player.lastSecondOf.move = this.coordinator.currentSecond
-
-		return {
-			newCoords: player.attributes.coordinates
-		}
+				newCoords: player.attributes.coordinates
+			} as IMoveResponse
+		})
 	}
 
 	addPlayer(
@@ -196,21 +158,18 @@ export class ZoneManager {
 			[GameObjectType.PLAYER][request.playerId] as GamePlayer
 
 		if (!player) {
+			return error('Invalid player')
+		}
+
+		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+			const items = this.testZone.itemLayout
+				[player.attributes.coordinates.y][player.attributes.coordinates.x]
+
 			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player'
-				}
-			}
-		}
-
-		const items = this.testZone.itemLayout
-			[player.attributes.coordinates.y][player.attributes.coordinates.x]
-
-		return {
-			inventory: player.inventory.items,
-			zoneItems: items.map(item => item.attributes as IGameItemAttributes)
-		}
+				inventory: player.inventory.items,
+				zoneItems: items.map(item => item.attributes as IGameItemAttributes)
+			} as IInspectItemsResponse
+		})
 	}
 
 	pickUpZoneItem(
@@ -220,21 +179,11 @@ export class ZoneManager {
 			[GameObjectType.PLAYER][request.playerId] as GamePlayer
 
 		if (!player) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player'
-				}
-			}
+			return error('Invalid player')
 		}
 
 		if (player.inventory.items.length >= player.inventory.maxSize) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Inventory is full'
-				}
-			}
+			return error('Inventory is full')
 		}
 
 		const items = this.testZone.itemLayout
@@ -246,31 +195,28 @@ export class ZoneManager {
 
 		if (matchingItems.length !== 1
 			|| !this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]) {
+			return error('Invalid Item')
+		}
+
+		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+			const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
+				&& anItem.attributes.id === request.id))
+
+			this.testZone.itemLayout
+				[player.attributes.coordinates.y][player.attributes.coordinates.x]
+				= zoneItems
+
+			delete this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]
+
+			const item = matchingItems[0] as GameItem
+
+			player.inventory.addItem(item)
+
 			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid Item'
-				}
-			}
-		}
-
-		const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
-			&& anItem.attributes.id === request.id))
-
-		this.testZone.itemLayout
-			[player.attributes.coordinates.y][player.attributes.coordinates.x]
-			= zoneItems
-
-		delete this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]
-
-		const item = matchingItems[0] as GameItem
-
-		player.inventory.addItem(item)
-
-		return {
-			inventory: player.inventory.items,
-			zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
-		}
+				inventory: player.inventory.items,
+				zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
+			} as IPickUpItemResponse
+		})
 	}
 
 	dropItemToZone(
@@ -280,35 +226,20 @@ export class ZoneManager {
 			[GameObjectType.PLAYER][request.playerId] as GamePlayer
 
 		if (!player) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Invalid player'
-				}
-			}
+			return error('Invalid player')
 		}
 
 		const items = this.testZone.itemLayout
 			[player.attributes.coordinates.y][player.attributes.coordinates.x]
 
 		if (items.length >= 30) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Map location is full'
-				}
-			}
+			return error('Map location is full')
 		}
 
 		const item = player.inventory.removeItem(request.type, request.id)
 
 		if (!item) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Item not in inventory'
-				}
-			}
+			return error('Item not in inventory')
 		}
 
 		item.attributes.coordinates = {
@@ -318,25 +249,17 @@ export class ZoneManager {
 		const addResult = this.testZone.add(item)
 
 		if (typeof addResult !== 'boolean') {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Item already on Map'
-				}
-			}
+			return error('Item already on Map')
 		} else if (!addResult) {
-			return {
-				error: {
-					code: ErrorCode.INVALID_REQUEST,
-					description: 'Error placing item on Map'
-				}
-			}
+			return error('Error placing item on Map')
 		}
 
-		return {
-			inventory: player.inventory.items,
-			zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
-		}
+		return this.coordinator.tradeManager.tradeDealSave(player, () => {
+			return {
+				inventory: player.inventory.items,
+				zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
+			} as IDropItemResponse
+		})
 	}
 
 }
