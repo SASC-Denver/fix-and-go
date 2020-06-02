@@ -1,9 +1,16 @@
+import {error}     from '../../utils/network'
 import {
 	GameObjectType,
 	IGameObject,
 	IObjectDirectory,
-}                            from '../game'
-import {IGameItemAttributes} from '../GameItem'
+}                  from '../game'
+import {
+	GameItem,
+	IGameItemAttributes,
+	IGameItemIdentifier,
+	itemIdentifierSafe
+}                  from '../GameItem'
+import {IResponse} from '../network/data'
 
 /**
  * An inventory of objects for a player or a store.
@@ -79,6 +86,38 @@ export class Inventory {
 			!(anItem.type === gameObjectType && anItem.id === gameObjectId))
 
 		return item
+	}
+
+	peekItemSafe<IR extends IResponse>(
+		itemIdentifier: IGameItemIdentifier,
+		callback: (
+			item: GameItem
+		) => IResponse | IR
+	): IResponse | IR {
+		return itemIdentifierSafe(itemIdentifier, (
+			itemType: GameObjectType.ITEM,
+			itemId: number
+		) => {
+			const item = this.peekItem(itemType, itemId)
+
+			if (!item) {
+				return error('Item not in inventory')
+			}
+
+			return callback(item)
+		})
+	}
+
+	peekItem(
+		gameObjectType: GameObjectType,
+		gameObjectId: number,
+	): GameItem {
+		const directoryForType = this.objectsDirectory[gameObjectType]
+		if (!directoryForType) {
+			return null
+		}
+
+		return directoryForType[gameObjectId] as GameItem
 	}
 
 }

@@ -17,16 +17,17 @@ import {
 	IZoneUpdates,
 	testZoneAttributes,
 	Zone
-}                    from '@fix-and-go/logic'
-import {Coordinator} from './Coordinator'
+}                        from '@fix-and-go/logic'
+import {AbstractManager} from './AbstractManager'
 
-export class ZoneManager {
+export class ZoneManager
+	extends AbstractManager {
 
-	coordinator: Coordinator
 	testZone: Zone
 	updates: IZoneUpdates = {}
 
 	constructor() {
+		super()
 		this.testZone = new Zone()
 		this.testZone.initFromAttributes(testZoneAttributes)
 	}
@@ -35,58 +36,50 @@ export class ZoneManager {
 		data: IMoveRequest
 	): IResponse | IMoveResponse {
 		// console.log(data)
+		return this.playerSafe(data, (
+			player: GamePlayer
+		) => {
 
-		if (typeof data !== 'object') {
-			return error('Invalid request')
-		}
-		// console.log('data.playerId: ' + data.playerId + ', ' + (typeof data.playerId !== 'number'))
+			if (player.lastSecondOf.move === this.coordinator.currentSecond) {
+				return error('Moving too quickly')
+			}
 
-		const players = this.coordinator.playerManager.players
-		if (typeof data.playerId !== 'number'
-			|| !players[data.playerId]) {
-			return error('Invalid player Id')
-		}
+			if (typeof data.positionChange !== 'object'
+				|| typeof data.positionChange.x !== 'number'
+				|| typeof data.positionChange.y !== 'number') {
+				return error('Invalid move to coordinates')
+			}
 
-		const player = players[data.playerId]
-		if (player.lastSecondOf.move === this.coordinator.currentSecond) {
-			return error('Moving too quickly')
-		}
+			const changeInX = data.positionChange.x
+			const changeInY = data.positionChange.y
 
-		if (typeof data.positionChange !== 'object'
-			|| typeof data.positionChange.x !== 'number'
-			|| typeof data.positionChange.y !== 'number') {
-			return error('Invalid move to coordinates')
-		}
+			if (changeInX < -1 || changeInX > 1) {
+				return error('Invalid X coordinate change')
+			}
 
-		const changeInX = data.positionChange.x
-		const changeInY = data.positionChange.y
+			if (changeInX < -1 || changeInX > 1) {
+				return error('Invalid Y coordinate change')
+			}
 
-		if (changeInX < -1 || changeInX > 1) {
-			return error('Invalid X coordinate change')
-		}
+			if (changeInX === 0 && changeInY === 0) {
+				// That's where the Player is
+				return error('No move needed')
+			}
 
-		if (changeInX < -1 || changeInX > 1) {
-			return error('Invalid Y coordinate change')
-		}
+			const newX = player.attributes.coordinates.x + changeInX
+			const newY = player.attributes.coordinates.y + changeInY
 
-		if (changeInX === 0 && changeInY === 0) {
-			// That's where the Player is
-			return error('No move needed')
-		}
+			if (!this.testZone.moveObject(player, newX, newY)) {
+				return error('Invalid move')
+			}
 
-		const newX = player.attributes.coordinates.x + changeInX
-		const newY = player.attributes.coordinates.y + changeInY
+			return this.coordinator.tradeManager.tradeDealSafe(player, () => {
+				player.lastSecondOf.move = this.coordinator.currentSecond
 
-		if (!this.testZone.moveObject(player, newX, newY)) {
-			return error('Invalid move')
-		}
-
-		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
-			player.lastSecondOf.move = this.coordinator.currentSecond
-
-			return {
-				newCoords: player.attributes.coordinates
-			} as IMoveResponse
+				return {
+					newCoords: player.attributes.coordinates
+				} as IMoveResponse
+			})
 		})
 	}
 
@@ -154,111 +147,103 @@ export class ZoneManager {
 	inspectZoneItems(
 		request: IInspectItemsRequest
 	): IResponse | IInspectItemsResponse {
-		const player = this.testZone.objectsDirectory
-			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
+			return this.coordinator.tradeManager.tradeDealSafe(player, () => {
+				const items = this.testZone.itemLayout
+					[player.attributes.coordinates.y][player.attributes.coordinates.x]
 
-		if (!player) {
-			return error('Invalid player')
-		}
-
-		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
-			const items = this.testZone.itemLayout
-				[player.attributes.coordinates.y][player.attributes.coordinates.x]
-
-			return {
-				inventory: player.inventory.items,
-				zoneItems: items.map(item => item.attributes as IGameItemAttributes)
-			} as IInspectItemsResponse
+				return {
+					inventory: player.inventory.items,
+					zoneItems: items.map(item => item.attributes as IGameItemAttributes)
+				} as IInspectItemsResponse
+			})
 		})
 	}
 
 	pickUpZoneItem(
 		request: IPickUpItemRequest
 	): IResponse | IPickUpItemResponse {
-		const player = this.testZone.objectsDirectory
-			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
 
-		if (!player) {
-			return error('Invalid player')
-		}
+			if (player.inventory.items.length >= player.inventory.maxSize) {
+				return error('Inventory is full')
+			}
 
-		if (player.inventory.items.length >= player.inventory.maxSize) {
-			return error('Inventory is full')
-		}
-
-		const items = this.testZone.itemLayout
-			[player.attributes.coordinates.y][player.attributes.coordinates.x]
-
-		const matchingItems = items.filter(anItem =>
-			anItem.attributes.type === request.type
-			&& anItem.attributes.id === request.id)
-
-		if (matchingItems.length !== 1
-			|| !this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]) {
-			return error('Invalid Item')
-		}
-
-		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
-			const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
-				&& anItem.attributes.id === request.id))
-
-			this.testZone.itemLayout
+			const items = this.testZone.itemLayout
 				[player.attributes.coordinates.y][player.attributes.coordinates.x]
-				= zoneItems
 
-			delete this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]
+			const matchingItems = items.filter(anItem =>
+				anItem.attributes.type === request.type
+				&& anItem.attributes.id === request.id)
 
-			const item = matchingItems[0] as GameItem
+			if (matchingItems.length !== 1
+				|| !this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]) {
+				return error('Invalid Item')
+			}
 
-			player.inventory.addItem(item)
+			return this.coordinator.tradeManager.tradeDealSafe(player, () => {
+				const zoneItems = items.filter(anItem => !(anItem.attributes.type === request.type
+					&& anItem.attributes.id === request.id))
 
-			return {
-				inventory: player.inventory.items,
-				zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
-			} as IPickUpItemResponse
+				this.testZone.itemLayout
+					[player.attributes.coordinates.y][player.attributes.coordinates.x]
+					= zoneItems
+
+				delete this.testZone.objectsDirectory[GameObjectType.ITEM][request.id]
+
+				const item = matchingItems[0] as GameItem
+
+				player.inventory.addItem(item)
+
+				return {
+					inventory: player.inventory.items,
+					zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
+				} as IPickUpItemResponse
+			})
 		})
 	}
 
 	dropItemToZone(
 		request: IDropItemRequest
 	): IResponse | IDropItemResponse {
-		const player = this.testZone.objectsDirectory
-			[GameObjectType.PLAYER][request.playerId] as GamePlayer
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
+			const items = this.testZone.itemLayout
+				[player.attributes.coordinates.y][player.attributes.coordinates.x]
 
-		if (!player) {
-			return error('Invalid player')
-		}
+			if (items.length >= 30) {
+				return error('Map location is full')
+			}
 
-		const items = this.testZone.itemLayout
-			[player.attributes.coordinates.y][player.attributes.coordinates.x]
+			const item = player.inventory.removeItem(request.type, request.id)
 
-		if (items.length >= 30) {
-			return error('Map location is full')
-		}
+			if (!item) {
+				return error('Item not in inventory')
+			}
 
-		const item = player.inventory.removeItem(request.type, request.id)
+			item.attributes.coordinates = {
+				...player.attributes.coordinates
+			}
 
-		if (!item) {
-			return error('Item not in inventory')
-		}
+			const addResult = this.testZone.add(item)
 
-		item.attributes.coordinates = {
-			...player.attributes.coordinates
-		}
+			if (typeof addResult !== 'boolean') {
+				return error('Item already on Map')
+			} else if (!addResult) {
+				return error('Error placing item on Map')
+			}
 
-		const addResult = this.testZone.add(item)
-
-		if (typeof addResult !== 'boolean') {
-			return error('Item already on Map')
-		} else if (!addResult) {
-			return error('Error placing item on Map')
-		}
-
-		return this.coordinator.tradeManager.tradeDealSafe(player, () => {
-			return {
-				inventory: player.inventory.items,
-				zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
-			} as IDropItemResponse
+			return this.coordinator.tradeManager.tradeDealSafe(player, () => {
+				return {
+					inventory: player.inventory.items,
+					zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
+				} as IDropItemResponse
+			})
 		})
 	}
 

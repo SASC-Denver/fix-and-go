@@ -1,51 +1,56 @@
-import {IGameItemAttributes} from '../GameItem'
-import {GamePlayer}          from '../GamePlayer'
+import {
+	IGameItemAttributes,
+	IGameItemIdentifier
+}                   from '../GameItem'
+import {GamePlayer} from '../GamePlayer'
 
 export enum TradeDealState {
 	STARTED,
 	IN_PROGRESS,
-	COMMITTED
+	CANCELLED,
+	COMPLETED,
+	ARCHIVED
 }
 
 export enum TradeDealChangeType {
 	ADD_THEIR_ITEM,
 	ADD_YOUR_ITEM,
 	CHANGE_YOUR_COINS,
+	CHANGE_THEIR_COINS,
 	REMOVE_THEIR_ITEM,
 	REMOVE_YOUR_ITEM,
 }
 
-export interface IExchangeSide {
+export interface IExchangeSideOffer {
 	coins: number;
-	items: IGameItemAttributes[]
+	committed: boolean;
+	items: IGameItemIdentifier[];
+}
+
+export interface ITradeDealPlayerAttributes {
+	id: number;
+	offer: IExchangeSideOffer;
+	username: string;
 }
 
 export interface ITradeDealAttributes {
-	id: number
+	cleanUpIn: number;
+	id: number;
 	parties: {
-		initiator: {
-			id: number
-			offer: IExchangeSide
-			username: string
-		}
-		receiver?: {
-			id: number
-			offer: IExchangeSide
-			username: string
-		}
+		initiator: ITradeDealPlayerAttributes;
+		receiver?: ITradeDealPlayerAttributes;
 	}
-	state: TradeDealState
-	storeInventory?: IGameItemAttributes[]
+	state: TradeDealState;
+	storeInventory?: IGameItemAttributes[];
+	version: number;
 }
 
 export class TradeDeal {
-
-	parties: {
-		initiator: GamePlayer
-		receiver: GamePlayer
-	}
-
 	attributes: ITradeDealAttributes
+	parties: {
+		initiator: GamePlayer;
+		receiver: GamePlayer;
+	}
 
 	constructor(
 		id: number,
@@ -58,12 +63,14 @@ export class TradeDeal {
 		}
 
 		this.attributes = {
+			cleanUpIn: 3,
 			id,
 			parties: {
 				initiator: {
 					id: initiator.attributes.id,
 					offer: {
 						coins: 0,
+						committed: false,
 						items: []
 					},
 					username: initiator.attributes.username
@@ -72,12 +79,14 @@ export class TradeDeal {
 					id: receiver.attributes.id,
 					offer: {
 						coins: 0,
+						committed: false,
 						items: []
 					},
 					username: receiver.attributes.username
 				}
 			},
-			state: TradeDealState.STARTED
+			state: TradeDealState.STARTED,
+			version: 0
 		}
 	}
 

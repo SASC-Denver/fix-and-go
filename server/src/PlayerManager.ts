@@ -1,7 +1,6 @@
 import {
 	CredentialsChecker,
 	error,
-	ErrorCode,
 	GamePlayer,
 	IGamePlayerAttributes,
 	IInventoryRequest,
@@ -13,16 +12,16 @@ import {
 	ISignInResponse,
 	ISignUpRequest,
 	ISignUpResponse
-}                    from '@fix-and-go/logic'
-import {Coordinator} from './Coordinator'
-import {UserDao}     from './db/dao/UserDao'
-import {IUser}       from './db/model/User'
+}                        from '@fix-and-go/logic'
+import {AbstractManager} from './AbstractManager'
+import {UserDao}         from './db/dao/UserDao'
+import {IUser}           from './db/model/User'
 
 const jsSHA = require('jssha')
 
-export class PlayerManager {
+export class PlayerManager
+	extends AbstractManager {
 
-	coordinator: Coordinator
 	credentialsChecker = new CredentialsChecker()
 	players: {
 		[id: number]: GamePlayer
@@ -97,21 +96,13 @@ export class PlayerManager {
 	getInventory(
 		request: IInventoryRequest
 	): IResponse | IInventoryResponse {
-		// console.log(JSON.stringify(request, null, 2))
-		const playerId = parseInt(request.playerId as any, 10)
-		if (!playerId
-			|| typeof playerId !== 'number') {
-			return error('Invalid player ID')
-		}
-
-		const player = this.players[request.playerId]
-		if (!player) {
-			return error('Invalid player')
-		}
-
-		return {
-			inventory: player.inventory.items
-		}
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
+			return {
+				inventory: player.inventory.items
+			} as IInventoryResponse
+		})
 	}
 
 	private addPlayer(

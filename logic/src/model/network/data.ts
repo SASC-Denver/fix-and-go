@@ -1,4 +1,7 @@
-import {TradeDealChangeType}   from '../..'
+import {
+	IGameItemIdentifier,
+	TradeDealChangeType
+}                              from '../..'
 import {GameObjectType}        from '../game'
 import {IGameItemAttributes}   from '../GameItem'
 import {IGamePlayerAttributes} from '../GamePlayer'
@@ -155,10 +158,7 @@ export interface ITradeDealReplyResponse
 export interface ITradeDealChangeRequest
 	extends ITradeDealRequest {
 	coins?: number;
-	item?: {
-		id: number;
-		type: GameObjectType.ITEM;
-	}
+	item?: IGameItemIdentifier;
 	type: TradeDealChangeType;
 }
 

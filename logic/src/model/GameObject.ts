@@ -10,6 +10,12 @@ export interface IGameObjectAttributes {
 	type?: GameObjectType;
 }
 
+export function isValidId(
+	id: number
+): boolean {
+	return typeof id === 'number' && id > 0
+}
+
 /**
  * Any game character, including Player or Boss
  */
@@ -20,7 +26,7 @@ export class GameObject
 		type: GameObjectType,
 		public attributes: IGameObjectAttributes
 	) {
-		attributes.type = type;
+		attributes.type = type
 	}
 
 }

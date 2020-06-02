@@ -1,12 +1,15 @@
 import {
 	error,
+	GamePlayer,
 	IChatRequest,
 	IChatSecondUpdateResponse,
 	IResponse
-}                    from '@fix-and-go/logic'
-import {Coordinator} from './Coordinator'
+}                        from '@fix-and-go/logic'
+import {AbstractManager} from './AbstractManager'
+import {Coordinator}     from './Coordinator'
 
-export class ChatManager {
+export class ChatManager
+	extends AbstractManager {
 
 	lastMessageId                           = 0
 	recentChat: IChatSecondUpdateResponse[] = []
@@ -29,23 +32,22 @@ export class ChatManager {
 	chat(
 		data: IChatRequest
 	): IResponse {
-		// console.log(data)
+		return this.playerSafe(data, (
+			player: GamePlayer
+		) => {
+			const players = this.coordinator.playerManager.players
+			if (typeof data.text !== 'string') {
+				return error('Invalid request')
+			}
 
-		const players = this.coordinator.playerManager.players
-		if (typeof data.playerId !== 'number'
-			|| typeof data.text !== 'string'
-			|| !players[data.playerId]) {
-			return error('Invalid request')
-		}
-		const player = players[data.playerId]
+			this.recentChat[this.recentChat.length - 1].messages.push({
+				id: ++this.lastMessageId,
+				text: data.text,
+				username: player.attributes.username
+			})
 
-		this.recentChat[this.recentChat.length - 1].messages.push({
-			id: ++this.lastMessageId,
-			text: data.text,
-			username: player.attributes.username
+			return {}
 		})
-
-		return {}
 	}
 
 	update(): void {

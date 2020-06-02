@@ -3,36 +3,46 @@
     import {getItemRows, renderItem} from "./utils/items";
     import {inventory} from "./ui-state";
 
+    export let filter;
+
     const dispatch = createEventDispatcher();
 
     let inventoryItems = [];
 
     $: itemRows = getItemRows(inventoryItems, 5, 4);
 
-    const inventoryUnsubscribe = inventory.subscribe(items => {
-        inventoryItems = items;
-    });
+    $: inventoryItems = computeInventoryItems($inventory, filter)
 
     onMount(async () => {
     })
 
     onDestroy(() => {
-        inventoryUnsubscribe()
     })
 
-    let render = renderItem
+    let render = renderItem;
+
+    function computeInventoryItems(
+        items,
+        filter
+    ) {
+        if (filter) {
+            return items.filter(filter);
+        }
+
+        return items;
+    }
 
     function selectInventoryItem(
         item
     ) {
         if (!item) {
-            return
+            return;
         }
 
         dispatch('selectInventoryItem', {
             id: item.id,
             type: item.type
-        })
+        });
     }
 
 </script>

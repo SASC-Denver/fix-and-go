@@ -1,5 +1,8 @@
 import {IZoneAttributes}     from '../game-state/Zone'
-import {IObjectCoordinates}  from '../model/game'
+import {
+	GameObjectType,
+	IObjectCoordinates
+}                            from '../model/game'
 import {IGameItemAttributes} from '../model/GameItem'
 
 const fighterPack = [{
@@ -27,7 +30,8 @@ function addItemPack(
 			...itemProperties,
 			coordinates: {
 				...coordinates
-			}
+			},
+			type: GameObjectType.ITEM
 		})
 	})
 }

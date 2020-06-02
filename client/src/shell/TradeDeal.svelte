@@ -1,29 +1,40 @@
 <script>
-    import {TradeDealChangeType, TradeDealState} from "@fix-and-go/logic";
+    import {
+        getTradeSide,
+        isPlayerTheInitiator,
+        TradeDealChangeType,
+        TradeDealState
+    } from "@fix-and-go/logic";
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
     import {getItemRows, renderItem} from "../utils/items";
     import ActionPopover from './ActionPopover.svelte'
     import Inventory from '../Inventory.svelte'
     import StoreInventory from './StoreInventory.svelte'
-    import {showZoneItems, tradeDeal, tradeDealError} from '../ui-state';
-    import {getTradeSide, isPlayerTheInitiator} from "../utils/tradeDeal";
+    import {tradeDeal, tradeDealError} from '../ui-state';
 
-    export let player
+    export let player;
 
     const dispatch = createEventDispatcher();
 
-    $: theirOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, false), 3, 4)
-    $: yourOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, true), 3, 4)
+    $: yourOfferedItems = getExchangeItems($tradeDeal, true, $tradeDeal.version);
+
+    $: inventoryFilter = getInventoryFilter(yourOfferedItems)
+
+    $: theirOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, false, $tradeDeal.version), 3, 4);
+    $: yourOfferedItemRows = getItemRows(yourOfferedItems, 3, 4);
 
     $: initiatedTradeWaitingForReply = $tradeDeal.state === TradeDealState.STARTED
-        && isPlayerTheInitiator($tradeDeal, player)
+        && isPlayerTheInitiator($tradeDeal, player);
     $: needToReplyTradeInvite = $tradeDeal.state === TradeDealState.STARTED
-        && !isPlayerTheInitiator($tradeDeal, player)
+        && !isPlayerTheInitiator($tradeDeal, player);
 
-    $: otherUsername = getTradeSide($tradeDeal, false, player).username
+    $: otherUsername = getTradeSide($tradeDeal, false, player).username;
+
+    $: yourSideCommitted = getTradeSide($tradeDeal, true, player).offer.committed;
+
 
     onMount(async () => {
-        tradeDealError.set(null)
+        tradeDealError.set(null);
     })
 
     onDestroy(() => {
@@ -33,7 +44,7 @@
         tradeDeal,
         yourSide
     ) {
-        return getTradeSide(tradeDeal, yourSide, player)
+        return getTradeSide(tradeDeal, yourSide, player).offer.items;
     }
 
     function accept(
@@ -42,7 +53,7 @@
         dispatch('tradeDealReply', {
             accept: true,
             tradeDealId: tradeDeal.id
-        })
+        });
     }
 
     function deny(
@@ -51,24 +62,43 @@
         dispatch('tradeDealReply', {
             accept: false,
             tradeDealId: tradeDeal.id
-        })
+        });
     }
 
-    let render = renderItem
+    let render = renderItem;
+
+    function getInventoryFilter(
+        yourOfferedItems
+    ) {
+        const hasItemByTypeAndId = {}
+        yourOfferedItems.forEach(item => {
+            let hasItemOfType = hasItemByTypeAndId[item.type];
+            if (!hasItemOfType) {
+                hasItemOfType = {};
+                hasItemByTypeAndId[item.type] = hasItemOfType;
+            }
+            hasItemOfType[item.id] = true
+        })
+        return (
+            item
+        ) => {
+            const hasItemOfType = hasItemByTypeAndId[item.type]
+            return !(hasItemOfType && hasItemOfType[item.id])
+        }
+    }
 
     function removeYourOfferedItem(
         item,
         tradeDeal
     ) {
         if (!item) {
-            return
+            return;
         }
 
         dispatch('tradeDealChange', {
-            change: TradeDealChangeType.REMOVE_YOUR_ITEM,
-            id: item.id,
+            item,
             tradeDealId: tradeDeal.id,
-            type: item.type,
+            type: TradeDealChangeType.REMOVE_YOUR_ITEM,
         });
     }
 
@@ -77,14 +107,13 @@
         tradeDeal
     ) {
         if (!item) {
-            return
+            return;
         }
 
-        dispatch('removeTheirOfferedItem', {
-            change: TradeDealChangeType.REMOVE_THEIR_ITEM,
-            id: item.id,
+        dispatch('tradeDealChange', {
+            item,
             tradeDealId: tradeDeal.id,
-            type: item.type,
+            type: TradeDealChangeType.REMOVE_THEIR_ITEM,
         });
     }
 
@@ -93,14 +122,13 @@
         tradeDeal
     ) {
         if (!item) {
-            return
+            return;
         }
 
-        dispatch('addYourOfferedItem', {
-            change: TradeDealChangeType.ADD_YOUR_ITEM,
-            id: item.id,
+        dispatch('tradeDealChange', {
+            item,
             tradeDealId: tradeDeal.id,
-            type: item.type,
+            type: TradeDealChangeType.ADD_YOUR_ITEM,
         });
     }
 
@@ -109,14 +137,13 @@
         tradeDeal
     ) {
         if (!item) {
-            return
+            return;
         }
 
-        dispatch('addTheirOfferedItem', {
-            change: TradeDealChangeType.ADD_THEIR_ITEM,
-            id: item.id,
+        dispatch('tradeDealChange', {
+            item,
             tradeDealId: tradeDeal.id,
-            type: item.type,
+            type: TradeDealChangeType.ADD_THEIR_ITEM,
         });
     }
 
@@ -124,14 +151,14 @@
         numberOfCoinsString,
         tradeDeal,
     ) {
-        const numberOfCoins = parseInt(numberOfCoinsString, 10)
-        if (typeof numberOfCoins !== 'number') {
-            return
+        const coins = parseInt(numberOfCoinsString, 10);
+        if (typeof coins !== 'number') {
+            return;
         }
 
         dispatch('tradeDealChange', {
-            change: TradeDealChangeType.CHANGE_YOUR_COINS,
-            numberOfCoins,
+            coins,
+            type: TradeDealChangeType.CHANGE_YOUR_COINS,
             tradeDealId: tradeDeal.id
         });
     }
@@ -309,7 +336,8 @@
                 <td>
                     Your Inventory
                     <Inventory
-                            on:selectInventoryItem="{event => addYourOfferedItem($tradeDeal)}"
+                            filter="{inventoryFilter}"
+                            on:selectInventoryItem="{event => addYourOfferedItem(event.detail, $tradeDeal)}"
                     ></Inventory>
                     Your Purse: 123 coins
                     <br>
@@ -320,17 +348,25 @@
                 </td>
                 <td>
                     <StoreInventory
-                            on:selectInventoryItem="{event => addTheirOfferedItem($tradeDeal)}"
+                            on:selectInventoryItem="{event => addTheirOfferedItem(event.detail, $tradeDeal)}"
                     ></StoreInventory>
                 </td>
             </tr>
         </table>
     </div>
     <div slot="actions">
+        {#if yourSideCommitted}
+        <button
+                disabled
+        >
+            Awaiting Response ...
+        </button>
+        {:else}
         <button
                 on:click="{event => commit($tradeDeal)}"
         >Commit
         </button>
+        {/if}
         <button
                 on:click="{event => cancel($tradeDeal)}"
         >Cancel

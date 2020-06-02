@@ -1,5 +1,12 @@
 <script>
-    import {ErrorCode, GameObjectType, GamePlayer, Zone} from '@fix-and-go/logic'
+    import {
+        ErrorCode,
+        GameObjectType,
+        GamePlayer,
+        isPlayerTheInitiator,
+        TradeDealState,
+        Zone
+    } from '@fix-and-go/logic'
     import {onDestroy, onMount} from 'svelte'
     import SignIn from './shell/SignIn.svelte'
     import Chat from './Chat.svelte'
@@ -24,7 +31,6 @@
         tradeDealError,
         zoneItemsError
     } from "./ui-state";
-    import {isPlayerTheInitiator} from "./utils/tradeDeal";
     // import TextToast from './shell/TextToast.svelte'
 
     let changeCount = 0
@@ -120,24 +126,48 @@
             lastChatBatch.set(data.chat);
         }
         if (data.tradeDeal) {
-            tradeDeal.set(data.tradeDeal)
-        } else {
-            tradeDeal.subscribe(lastTradeDeal => {
-                if (lastTradeDeal) {
-                    let otherPlayerUsername = lastTradeDeal.parties.initiator.username;
-                    if(isPlayerTheInitiator(lastTradeDeal, player)) {
-                        otherPlayerUsername = lastTradeDeal.parties.receiver.username;
+            if (data.tradeDeal.state === TradeDealState.COMPLETED
+                || data.tradeDeal.state === TradeDealState.CANCELLED) {
+                closeTradeDeal(data)
+            } else {
+                tradeDeal.subscribe(lastTradeDeal => {
+                    if (!lastTradeDeal) {
+                        getInventory().then()
                     }
-                    lastMessage.set({
-                        eventId: ++eventCount,
-                        value: `Trade with "${otherPlayerUsername}" canceled`
-                    });
-                }
-                tradeDeal.set(null)
-            })()
+                })()
+                tradeDeal.set(data.tradeDeal)
+            }
+        } else {
+            closeTradeDeal(data)
         }
         lastUpdateSecond = data.currentSecond
         changeCount++
+    }
+
+    function closeTradeDeal(
+        data
+    ) {
+        tradeDeal.subscribe(lastTradeDeal => {
+            if (lastTradeDeal) {
+                let otherPlayerUsername = lastTradeDeal.parties.initiator.username;
+                if (isPlayerTheInitiator(lastTradeDeal, player)) {
+                    otherPlayerUsername = lastTradeDeal.parties.receiver.username;
+                }
+                let tradeDealStatus = 'Canceled'
+                if (data.tradeDeal
+                    && data.tradeDeal.state === TradeDealState.COMPLETED) {
+                    tradeDealStatus = 'Completed'
+
+                }
+
+                lastMessage.set({
+                    eventId: ++eventCount,
+                    value: `Trade with "${otherPlayerUsername}" ${tradeDealStatus}`
+                });
+                tradeDeal.set(null)
+                getInventory().then()
+            }
+        })()
     }
 
     function signIn(event) {
