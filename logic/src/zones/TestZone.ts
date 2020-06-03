@@ -85,6 +85,153 @@ addItemPack(fighterPack, {
 	y: 13
 })
 
+addItemPack(fighterPack, {
+	x: 7,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 7,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 7,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 7,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 7,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 7,
+	y: 13
+})
+addItemPack(fighterPack, {
+	x: 8,
+	y: 13
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 9,
+	y: 13
+})
+addItemPack(fighterPack, {
+	x: 10,
+	y: 13
+})
+
+addItemPack(fighterPack, {
+	x: 11,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 8
+})
+addItemPack(fighterPack, {
+	x: 11,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 9
+})
+addItemPack(fighterPack, {
+	x: 11,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 10
+})
+addItemPack(fighterPack, {
+	x: 11,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 11
+})
+addItemPack(fighterPack, {
+	x: 11,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 12
+})
+addItemPack(fighterPack, {
+	x: 11,
+	y: 13
+})
+addItemPack(fighterPack, {
+	x: 12,
+	y: 13
+})
+
+
 export const testZoneAttributes: IZoneAttributes = {
 	bosses: [{
 		coordinates: {
