@@ -116,6 +116,7 @@ export class TradeManager
 			player: GamePlayer,
 			tradeDeal: TradeDeal
 		) => {
+			let yourChange = false
 			switch (request.type) {
 				case TradeDealChangeType.ADD_THEIR_ITEM:
 					return error('Not implemented')
@@ -140,9 +141,27 @@ export class TradeManager
 						} as ITradeDealChangeResponse
 					})
 				case TradeDealChangeType.CHANGE_YOUR_COINS:
-					return error('Not implemented')
-				case TradeDealChangeType.CHANGE_THEIR_COINS:
-					return error('Not implemented')
+					yourChange = true
+				case TradeDealChangeType.CHANGE_THEIR_COINS: {
+					if (typeof request.coins !== 'number'
+						|| request.coins < 0 || request.coins >= 1000000) {
+						return error('Invalid number of coins')
+					}
+					const playerTradeDealSide      = getTradeSide(tradeDeal.attributes, true, player)
+					const otherPlayerTradeDealSide = getTradeSide(tradeDeal.attributes, false, player)
+					if (yourChange) {
+						playerTradeDealSide.offer.coins = request.coins
+					} else {
+						otherPlayerTradeDealSide.offer.coins = request.coins
+					}
+
+					playerTradeDealSide.offer.committed      = false
+					otherPlayerTradeDealSide.offer.committed = false
+					tradeDeal.attributes.version++
+					return {
+						tradeDealId: tradeDeal.attributes.id
+					} as ITradeDealChangeResponse
+				}
 				case TradeDealChangeType.REMOVE_THEIR_ITEM:
 					return this.removeTradeDealItem(request.item, tradeDeal, player, false)
 				case TradeDealChangeType.REMOVE_YOUR_ITEM:
@@ -193,24 +212,30 @@ export class TradeManager
 			const otherPlayerTradeDealSide
 			                  = getTradeSide(tradeDeal.attributes, false, player)
 
-			if (otherPlayerTradeDealSide.offer.committed) {
-				if (player.inventory.maxSize <
-					player.inventory.items.length + otherPlayerTradeDealSide.offer.items.length) {
-					return error(`Cannot commit to trade, your inventory is too full to accept all new items`)
-				}
-				if (otherPlayer.inventory.maxSize <
-					otherPlayer.inventory.items.length + playerTradeDealSide.offer.items.length) {
-					return error(`Cannot commit to trade, "${otherPlayer.attributes.username}" inventory is too full to accept all new items`)
-				}
+			if (player.inventory.maxSize <
+				player.inventory.items.length + otherPlayerTradeDealSide.offer.items.length) {
+				return error(`Cannot commit to trade, your inventory is too full to accept all new items`)
+			}
+			if (playerTradeDealSide.offer.coins > player.purse.coins) {
+				return error(`Cannot commit to trade, you have fewer coins than you offered`)
+			}
 
-				// console.log()
-				// console.log('player:')
-				return this.inventoryStateSafe(
-					playerTradeDealSide.offer,
-					player.inventory,
-					(
-						playerItemsToRemove: GameItem[]
-					) => {
+			// console.log()
+			// console.log('player:')
+			return this.inventoryStateSafe(
+				playerTradeDealSide.offer,
+				player.inventory,
+				(
+					playerItemsToRemove: GameItem[]
+				) => {
+					if (otherPlayerTradeDealSide.offer.committed) {
+						if (otherPlayer.inventory.maxSize <
+							otherPlayer.inventory.items.length + playerTradeDealSide.offer.items.length) {
+							return error(`Cannot commit to trade, "${otherPlayer.attributes.username}" inventory is too full to accept all new items`)
+						}
+						if (otherPlayerTradeDealSide.offer.coins > otherPlayer.purse.coins) {
+							return error(`Cannot commit to trade, "${otherPlayer.attributes.username}" has fewer coins than they offered`)
+						}
 						// console.log('other player:')
 						return this.inventoryStateSafe(
 							otherPlayerTradeDealSide.offer,
@@ -230,17 +255,23 @@ export class TradeManager
 								otherPlayerItemsToRemove.forEach(item => {
 									player.inventory.addItem(item)
 								})
+								otherPlayer.purse.coins += playerTradeDealSide.offer.coins
+									- otherPlayerTradeDealSide.offer.coins
+								player.purse.coins += otherPlayerTradeDealSide.offer.coins
+									- playerTradeDealSide.offer.coins
 
 								tradeDeal.attributes.state = TradeDealState.COMPLETED
 
 								return {
 									tradeDealId: tradeDeal.attributes.id
 								} as ITradeDealCommitResponse
-							}
-						)
+							})
+					} else {
+						return {
+							tradeDealId: tradeDeal.attributes.id
+						} as ITradeDealCommitResponse
 					}
-				)
-			}
+				})
 
 			return {
 				tradeDealId: tradeDeal.attributes.id

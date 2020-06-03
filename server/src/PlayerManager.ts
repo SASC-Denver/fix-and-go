@@ -100,7 +100,8 @@ export class PlayerManager
 			player: GamePlayer
 		) => {
 			return {
-				inventory: player.inventory.items
+				inventory: player.inventory.items,
+				purse: player.purse.coins
 			} as IInventoryResponse
 		})
 	}

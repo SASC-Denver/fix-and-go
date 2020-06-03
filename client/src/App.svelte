@@ -22,7 +22,7 @@
         inventory,
         lastChatBatch,
         lastMessage,
-        mapSelection,
+        mapSelection, purse,
         setCredentials,
         showSignIn,
         showZoneItems,
@@ -218,6 +218,7 @@
             return;
         }
         inventory.set(data.inventory);
+        purse.set(data.purse);
     }
 
     async function inspectZoneItems() {
@@ -319,7 +320,8 @@
     function tradeDealChange(
         event
     ) {
-        doTradeDealChange(event.detail).then()
+        tradeDealError.set(null);
+        doTradeDealChange(event.detail).then();
     }
 
     async function doTradeDealChange(

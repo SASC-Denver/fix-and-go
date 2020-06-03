@@ -10,14 +10,26 @@
     import ActionPopover from './ActionPopover.svelte'
     import Inventory from '../Inventory.svelte'
     import StoreInventory from './StoreInventory.svelte'
-    import {tradeDeal, tradeDealError} from '../ui-state';
+    import {purse, tradeDeal, tradeDealError} from '../ui-state';
 
     export let player;
 
     const dispatch = createEventDispatcher();
+    let tradeDealUnsubscribe;
+    let offeredCoins = {
+        your: {
+            value: getTradeSide($tradeDeal, true, player).offer.coins,
+            changedLocally: false
+        },
+        their: {
+            value: getTradeSide($tradeDeal, false, player).offer.coins,
+            changedLocally: false
+        }
+    };
+
+    $: yourPurseCoins = $purse - offeredCoins.your.value;
 
     $: yourOfferedItems = getExchangeItems($tradeDeal, true, $tradeDeal.version);
-
     $: inventoryFilter = getInventoryFilter(yourOfferedItems)
 
     $: theirOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, false, $tradeDeal.version), 3, 4);
@@ -32,12 +44,33 @@
 
     $: yourSideCommitted = getTradeSide($tradeDeal, true, player).offer.committed;
 
-
     onMount(async () => {
+        tradeDealUnsubscribe = tradeDeal.subscribe(currentTradeDeal => {
+            if(!$tradeDeal) {
+                return;
+            }
+            const yourTradeSide = getTradeSide($tradeDeal, true, player);
+            const theirTradeSide = getTradeSide($tradeDeal, false, player);
+
+            if (!offeredCoins.your.changedLocally
+                && (yourTradeSide.offer.coins || offeredCoins.your.value)) {
+                // console.log('yourTradeSide.offer.coins: ' + yourTradeSide.offer.coins)
+                // console.log('offeredCoins.your.value:   ' + offeredCoins.your.value)
+                offeredCoins.your.value = yourTradeSide.offer.coins;
+            }
+            offeredCoins.your.changedLocally = false;
+
+            if (!offeredCoins.your.changedLocally
+                && (theirTradeSide.offer.coins || offeredCoins.their.value)) {
+                offeredCoins.their.value = theirTradeSide.offer.coins;
+            }
+            offeredCoins.their.changedLocally = false;
+        })
         tradeDealError.set(null);
     })
 
     onDestroy(() => {
+        tradeDealUnsubscribe()
     })
 
     function getExchangeItems(
@@ -148,19 +181,66 @@
     }
 
     function changeNumberOfYourOfferedCoins(
-        numberOfCoinsString,
+        event,
         tradeDeal,
     ) {
-        const coins = parseInt(numberOfCoinsString, 10);
-        if (typeof coins !== 'number') {
+        if (!isValidCoinsInputKey(event)) {
             return;
         }
+        let yourOfferedCoinsPreviously = 0;
+        if (offeredCoins.your.value) {
+            yourOfferedCoinsPreviously = parseInt(offeredCoins.your.value, 10);
+        }
+        // console.log('yourOfferedCoins before: ' + yourOfferedCoins);
+        setTimeout(() => {
+            let coins = 0;
+            if (offeredCoins.your.value) {
+                coins = parseInt(offeredCoins.your.value, 10);
 
-        dispatch('tradeDealChange', {
-            coins,
-            type: TradeDealChangeType.CHANGE_YOUR_COINS,
-            tradeDealId: tradeDeal.id
-        });
+            }
+            // console.log('yourOfferedCoins after: ' + yourOfferedCoins);
+            if (yourOfferedCoinsPreviously === coins) {
+                // console.log('same your offered coins: ' + coins);
+                return;
+            }
+            offeredCoins.your.changedLocally = true;
+
+            dispatch('tradeDealChange', {
+                coins,
+                type: TradeDealChangeType.CHANGE_YOUR_COINS,
+                tradeDealId: tradeDeal.id
+            });
+        }, 1)
+    }
+
+    function changeNumberOfTheirOfferedCoins(
+        event,
+        tradeDeal,
+    ) {
+        if (!isValidCoinsInputKey(event)) {
+            return
+        }
+        let theirOfferedCoinsPreviously = 0
+        if (offeredCoins.their.value) {
+            theirOfferedCoinsPreviously = parseInt(offeredCoins.their.value, 10);
+        }
+        setTimeout(() => {
+            let coins = 0
+            if (offeredCoins.their.value) {
+                coins = parseInt(offeredCoins.their.value, 10);
+            }
+            if (theirOfferedCoinsPreviously === coins) {
+                // console.log('same their offered coins: ' + coins)
+                return
+            }
+            offeredCoins.their.changedLocally = true;
+
+            dispatch('tradeDealChange', {
+                coins,
+                type: TradeDealChangeType.CHANGE_THEIR_COINS,
+                tradeDealId: tradeDeal.id
+            });
+        }, 1)
     }
 
     function cancel(
@@ -177,6 +257,24 @@
         dispatch('tradeDealCommit', {
             tradeDealId: tradeDeal.id
         });
+    }
+
+    function isValidCoinsInputKey(event) {
+        switch (event.key) {
+            case 'Shift':
+            case 'ArrowLeft':
+            case 'ArrowRight':
+            case 'Backspace':
+            case 'Delete':
+                return true;
+        }
+
+        if (!/^\d$/.test(event.key)) {
+            event.preventDefault();
+            return false;
+        }
+
+        return true;
     }
 
 </script>
@@ -286,9 +384,14 @@
         <table class="layout">
             <tr>
                 <td>
-                    Your:
+                    Your Offer:
                     <br>
-                    Coins: 12
+                    Coins: <input
+                        bind:value={offeredCoins.your.value}
+                        maxlength="6"
+                        on:keydown="{event => changeNumberOfYourOfferedCoins(event, $tradeDeal)}"
+                        type="text"
+                >
                     <br>
                     Items:
                     <br>
@@ -309,9 +412,14 @@
                     </aside>
                 </td>
                 <td>
-                    Their (Name):
+                    Their Offer:
                     <br>
-                    Coins: 0
+                    Coins: <input
+                        bind:value={offeredCoins.their.value}
+                        maxlength="6"
+                        on:keydown="{event => changeNumberOfTheirOfferedCoins(event, $tradeDeal)}"
+                        type="text"
+                >
                     <br>
                     Items:
                     <br>
@@ -339,17 +447,15 @@
                             filter="{inventoryFilter}"
                             on:selectInventoryItem="{event => addYourOfferedItem(event.detail, $tradeDeal)}"
                     ></Inventory>
-                    Your Purse: 123 coins
+                    Your Purse: {yourPurseCoins} coins
                     <br>
-                    Transfer:
-                    <input
-                            type="text"
-                    >
                 </td>
                 <td>
+                    <!--
                     <StoreInventory
                             on:selectInventoryItem="{event => addTheirOfferedItem(event.detail, $tradeDeal)}"
                     ></StoreInventory>
+                    -->
                 </td>
             </tr>
         </table>
