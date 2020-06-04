@@ -57,7 +57,7 @@
         }
 
         mapSelectionUnsubscribe = mapSelection.subscribe(object =>
-            objectAtSelection = object)
+                objectAtSelection = object)
 
         // textToastUnsubscribe = stateOfTextToast.subscribe(
         // 	value => {
@@ -118,16 +118,16 @@
 
     async function getUpdates() {
         const data = await getData('api/updates?playerId=' + player.attributes.id
-            + '&lastUpdateSecond=' + lastUpdateSecond);
+                + '&lastUpdateSecond=' + lastUpdateSecond);
         testZone.updateObjects(data.zone.dimensions,
-            data.zone.updates,
-            player)
+                data.zone.updates,
+                player)
         if (data.chat.length) {
             lastChatBatch.set(data.chat);
         }
         if (data.tradeDeal) {
             if (data.tradeDeal.state === TradeDealState.COMPLETED
-                || data.tradeDeal.state === TradeDealState.CANCELLED) {
+                    || data.tradeDeal.state === TradeDealState.CANCELLED) {
                 closeTradeDeal(data)
             } else {
                 tradeDeal.subscribe(lastTradeDeal => {
@@ -145,7 +145,7 @@
     }
 
     function closeTradeDeal(
-        data
+            data
     ) {
         tradeDeal.subscribe(lastTradeDeal => {
             if (lastTradeDeal) {
@@ -155,7 +155,7 @@
                 }
                 let tradeDealStatus = 'Canceled'
                 if (data.tradeDeal
-                    && data.tradeDeal.state === TradeDealState.COMPLETED) {
+                        && data.tradeDeal.state === TradeDealState.COMPLETED) {
                     tradeDealStatus = 'Completed'
 
                 }
@@ -175,7 +175,7 @@
     }
 
     async function doSignIn(
-        inputData
+            inputData
     ) {
         const data = await putData('api/signIn', inputData, signInError);
 
@@ -195,7 +195,7 @@
     }
 
     async function doSignUp(
-        inputData
+            inputData
     ) {
         const data = await putData('api/signUp', inputData, signInError);
         if (!data) {
@@ -236,13 +236,13 @@
     }
 
     function pickUpZoneItem(
-        event
+            event
     ) {
         doPickUpZoneItem(event.detail).then()
     }
 
     async function doPickUpZoneItem(
-        inputData
+            inputData
     ) {
         const data = await putData('api/pickUpZoneItem', {
             playerId: player.attributes.id,
@@ -257,13 +257,13 @@
     }
 
     function dropItemToZone(
-        event
+            event
     ) {
         doDropItemToZone(event.detail).then()
     }
 
     async function doDropItemToZone(
-        inputData
+            inputData
     ) {
         const data = await putData('api/dropItemToZone', {
             playerId: player.attributes.id,
@@ -279,17 +279,17 @@
 
 
     function tradeDealStart(
-        event
+            event
     ) {
         if (!objectAtSelection
-            || objectAtSelection.attributes.type !== GameObjectType.PLAYER) {
+                || objectAtSelection.attributes.type !== GameObjectType.PLAYER) {
             return;
         }
         doTradeDealStart(objectAtSelection).then()
     }
 
     async function doTradeDealStart(
-        toPlayer
+            toPlayer
     ) {
         await putData('api/tradeDealStart', {
             playerId: player.attributes.id,
@@ -298,13 +298,13 @@
     }
 
     function tradeDealReply(
-        event
+            event
     ) {
         doTradeDealReply(event.detail).then()
     }
 
     async function doTradeDealReply(
-        inputData
+            inputData
     ) {
         const data = await putData('api/tradeDealReply', {
             playerId: player.attributes.id,
@@ -318,14 +318,14 @@
     }
 
     function tradeDealChange(
-        event
+            event
     ) {
         tradeDealError.set(null);
         doTradeDealChange(event.detail).then();
     }
 
     async function doTradeDealChange(
-        inputData
+            inputData
     ) {
         const data = await putData('api/tradeDealChange', {
             playerId: player.attributes.id,
@@ -339,13 +339,13 @@
     }
 
     function tradeDealCancel(
-        event
+            event
     ) {
         doTradeDealCancel(event.detail).then()
     }
 
     async function doTradeDealCancel(
-        inputData
+            inputData
     ) {
         const data = await putData('api/tradeDealCancel', {
             playerId: player.attributes.id,
@@ -359,13 +359,13 @@
     }
 
     function tradeDealCommit(
-        event
+            event
     ) {
         doTradeDealCommit(event.detail).then()
     }
 
     async function doTradeDealCommit(
-        inputData
+            inputData
     ) {
         const data = await putData('api/tradeDealCommit', {
             playerId: player.attributes.id,
@@ -379,8 +379,8 @@
     }
 
     async function getData(
-        url,
-        errorMessageStore = lastMessage
+            url,
+            errorMessageStore = lastMessage
     ) {
         let data = null
         try {
@@ -391,6 +391,7 @@
             });
             data = await response.json();
         } catch (e) {
+            console.log(e);
             errorMessageStore.set({
                 eventId: ++eventCount,
                 value: 'Connection lost'
@@ -405,9 +406,9 @@
     }
 
     async function putData(
-        url,
-        inputData,
-        errorMessageStore = lastMessage
+            url,
+            inputData,
+            errorMessageStore = lastMessage
     ) {
         let data = null
         try {
@@ -423,6 +424,7 @@
             });
             data = await response.json();
         } catch (e) {
+            console.log(e);
             errorMessageStore.set({
                 eventId: ++eventCount,
                 value: 'Connection lost'
@@ -437,8 +439,8 @@
     }
 
     function hasRemoteError(
-        data,
-        errorMessageStore
+            data,
+            errorMessageStore
     ) {
         if (!data.error) {
             return false;
@@ -564,24 +566,24 @@
     </main>
 </section>
 {#if $showSignIn}
-<SignIn
-        on:signIn="{signIn}"
-        on:signUp="{signUp}"
-></SignIn>
+    <SignIn
+            on:signIn="{signIn}"
+            on:signUp="{signUp}"
+    ></SignIn>
 {/if}
 {#if $showZoneItems}
-<ZoneItems
-        on:pickUpZoneItem="{pickUpZoneItem}"
-        on:dropItemToZone="{dropItemToZone}"
-        zoneItems={currentCellItems}
-></ZoneItems>
+    <ZoneItems
+            on:pickUpZoneItem="{pickUpZoneItem}"
+            on:dropItemToZone="{dropItemToZone}"
+            zoneItems={currentCellItems}
+    ></ZoneItems>
 {/if}
 {#if showTradeDeal}
-<TradeDeal
-        player="{player}"
-        on:tradeDealCancel="{tradeDealCancel}"
-        on:tradeDealChange="{tradeDealChange}"
-        on:tradeDealCommit="{tradeDealCommit}"
-        on:tradeDealReply="{tradeDealReply}"
-></TradeDeal>
+    <TradeDeal
+            player="{player}"
+            on:tradeDealCancel="{tradeDealCancel}"
+            on:tradeDealChange="{tradeDealChange}"
+            on:tradeDealCommit="{tradeDealCommit}"
+            on:tradeDealReply="{tradeDealReply}"
+    ></TradeDeal>
 {/if}
