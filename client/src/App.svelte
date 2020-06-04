@@ -119,29 +119,32 @@
     async function getUpdates() {
         const data = await getData('api/updates?playerId=' + player.attributes.id
                 + '&lastUpdateSecond=' + lastUpdateSecond);
+        if(!data) {
+            return;
+        }
         testZone.updateObjects(data.zone.dimensions,
                 data.zone.updates,
-                player)
+                player);
         if (data.chat.length) {
             lastChatBatch.set(data.chat);
         }
         if (data.tradeDeal) {
             if (data.tradeDeal.state === TradeDealState.COMPLETED
                     || data.tradeDeal.state === TradeDealState.CANCELLED) {
-                closeTradeDeal(data)
+                closeTradeDeal(data);
             } else {
                 tradeDeal.subscribe(lastTradeDeal => {
                     if (!lastTradeDeal) {
-                        getInventory().then()
+                        getInventory().then();
                     }
                 })()
-                tradeDeal.set(data.tradeDeal)
+                tradeDeal.set(data.tradeDeal);
             }
         } else {
-            closeTradeDeal(data)
+            closeTradeDeal(data);
         }
-        lastUpdateSecond = data.currentSecond
-        changeCount++
+        lastUpdateSecond = data.currentSecond;
+        changeCount++;
     }
 
     function closeTradeDeal(
