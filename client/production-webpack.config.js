@@ -53,7 +53,12 @@ module.exports = {
         }
     },
     entry: {
-        bundle: ['./src/main.js']
+            bundle: ['./src/main.js'],
+            runtime: [
+                'core-js/stable',
+                'regenerator-runtime/runtime',
+                'whatwg-fetch'
+            ]
     },
     resolve: {
         alias: {
@@ -117,16 +122,24 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.(js|mjs)$/,
+                exclude: /core-js/,
+                loader: "babel-loader",
+            },
+            {
                 test: /\.svelte$/,
-                use: {
-                    loader: 'svelte-loader',
-                    options: {
-                        // skipIntroByDefault: true,
-                        // nestedTransitions: true,
-                        emitCss: true,
-                        hotReload: true
+                use: [
+                    "babel-loader",
+                    {
+                        loader: 'svelte-loader',
+                        options: {
+                            // skipIntroByDefault: true,
+                            // nestedTransitions: true,
+                            emitCss: true,
+                            hotReload: true
+                        }
                     }
-                }
+                ]
             },
             {
                 test: /\.css$/,

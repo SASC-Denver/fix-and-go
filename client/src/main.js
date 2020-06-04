@@ -1,8 +1,3 @@
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'whatwg-fetch'
-
-
 import App from './App.svelte'
 
 import './assets/styles/global.css'

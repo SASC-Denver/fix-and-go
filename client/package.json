@@ -31,7 +31,7 @@
   },
   "name": "@fix-and-go/client",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "cross-env NODE_ENV=production webpack --config production-webpack.config.js",
     "dev": "webpack-dev-server --port 8082 --content-base public"
   },
   "version": "0.0.1"
