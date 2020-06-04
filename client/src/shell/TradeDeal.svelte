@@ -35,9 +35,9 @@
     $: theirOfferedItemRows = getItemRows(getExchangeItems($tradeDeal, false, $tradeDeal.version), 3, 4);
     $: yourOfferedItemRows = getItemRows(yourOfferedItems, 3, 4);
 
-    $: initiatedTradeWaitingForReply = $tradeDeal.state === TradeDealState.STARTED
+    $: initiatedTradeWaitingForReply = $tradeDeal.state === TradeDealState.REQUESTED
         && isPlayerTheInitiator($tradeDeal, player);
-    $: needToReplyTradeInvite = $tradeDeal.state === TradeDealState.STARTED
+    $: needToReplyTradeInvite = $tradeDeal.state === TradeDealState.REQUESTED
         && !isPlayerTheInitiator($tradeDeal, player);
 
     $: otherUsername = getTradeSide($tradeDeal, false, player).username;

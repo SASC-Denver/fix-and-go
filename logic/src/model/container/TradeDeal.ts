@@ -5,7 +5,7 @@ import {
 import {GamePlayer} from '../GamePlayer'
 
 export enum TradeDealState {
-	STARTED,
+	REQUESTED,
 	IN_PROGRESS,
 	CANCELLED,
 	COMPLETED,
@@ -43,6 +43,7 @@ export interface ITradeDealAttributes {
 	state: TradeDealState;
 	storeInventory?: IGameItemAttributes[];
 	version: number;
+
 }
 
 export class TradeDeal {
@@ -85,7 +86,7 @@ export class TradeDeal {
 					username: receiver.attributes.username
 				}
 			},
-			state: TradeDealState.STARTED,
+			state: TradeDealState.REQUESTED,
 			version: 0
 		}
 	}

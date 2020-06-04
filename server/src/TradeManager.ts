@@ -120,11 +120,23 @@ export class TradeManager
 			switch (request.type) {
 				case TradeDealChangeType.ADD_THEIR_ITEM:
 					return error('Not implemented')
-				case TradeDealChangeType.ADD_YOUR_ITEM:
+				case TradeDealChangeType.ADD_YOUR_ITEM: {
+					const playerTradeDealSide = getTradeSide(tradeDeal.attributes, true, player)
+					const itemAlreadyInOffer  = playerTradeDealSide.offer.items.some(
+						item =>
+							item.type === request.item.type && item.id === request.item.id)
+
+					if (itemAlreadyInOffer) {
+						// Player may have double clicked on the item, don't send back
+						// an error
+						return {
+							tradeDealId: tradeDeal.attributes.id
+						}
+					}
+
 					return player.inventory.peekItemSafe(request.item, (
 						item: GameItem
 					) => {
-						const playerTradeDealSide      = getTradeSide(tradeDeal.attributes, true, player)
 						const otherPlayerTradeDealSide = getTradeSide(tradeDeal.attributes, false, player)
 
 						playerTradeDealSide.offer.items.push({
@@ -140,6 +152,7 @@ export class TradeManager
 							tradeDealId: tradeDeal.attributes.id
 						} as ITradeDealChangeResponse
 					})
+				}
 				case TradeDealChangeType.CHANGE_YOUR_COINS:
 					yourChange = true
 				case TradeDealChangeType.CHANGE_THEIR_COINS: {
@@ -309,7 +322,7 @@ export class TradeManager
 		let cancelTradeDeal = false
 		if (player.tradeDeal) {
 			switch (player.tradeDeal.attributes.state) {
-				case TradeDealState.STARTED:
+				case TradeDealState.REQUESTED:
 					cancelTradeDeal = true
 					break
 				case TradeDealState.IN_PROGRESS:
