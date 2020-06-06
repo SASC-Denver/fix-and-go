@@ -5,7 +5,7 @@ import {
 } from './game'
 
 export interface IGameObjectAttributes {
-	coordinates: IObjectCoordinates;
+	coordinates?: IObjectCoordinates;
 	id?: number;
 	type?: GameObjectType;
 }
