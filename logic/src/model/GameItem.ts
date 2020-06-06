@@ -1,4 +1,5 @@
 import {error}          from '../utils/network'
+import {EquipmentSlot}  from './container/Equipment'
 import {GameObjectType} from './game'
 import {
 	GameObject,
@@ -6,6 +7,12 @@ import {
 	isValidId
 }                       from './GameObject'
 import {IResponse}      from './network/data'
+
+export enum GameItemType {
+	CONSUMABLE,
+	EQUIPMENT,
+	QUEST_ITEM,
+}
 
 export interface IGameItemIdentifier {
 	id: number
@@ -17,6 +24,12 @@ export interface IGameItemAttributes
 	extends IGameObjectAttributes {
 	name: string
 	type: GameObjectType.ITEM
+	itemType: GameItemType
+}
+
+export interface IEquipmentAttributes
+	extends IGameItemAttributes {
+	equipmentSlot: EquipmentSlot
 }
 
 export function isValidItemType(

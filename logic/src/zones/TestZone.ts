@@ -1,26 +1,54 @@
-import {IZoneAttributes}     from '../game-state/Zone'
+import {IZoneAttributes} from '../game-state/Zone'
+import {EquipmentSlot}   from '../model/container/Equipment'
 import {
 	GameObjectType,
 	IObjectCoordinates
-}                            from '../model/game'
-import {IGameItemAttributes} from '../model/GameItem'
+}                        from '../model/game'
+import {
+	GameItemType,
+	IGameItemAttributes
+}                        from '../model/GameItem'
 
 const fighterPack = [{
+	equipmentSlot: EquipmentSlot.HEAD,
+	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Helmet'
 }, {
+	equipmentSlot: EquipmentSlot.FEET,
+	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Boots'
 }, {
+	equipmentSlot: EquipmentSlot.BODY,
+	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Armor'
 }, {
+	equipmentSlot: EquipmentSlot.LEGS,
+	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Leggings'
 }, {
+	equipmentSlot: EquipmentSlot.WIELD,
+	itemType: GameItemType.EQUIPMENT,
 	name: 'Broadsword'
+}, {
+	equipmentSlot: EquipmentSlot.HOLD,
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Wooden Shield'
+}, {
+	equipmentSlot: EquipmentSlot.LIGHT,
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Torch'
+}, {
+	equipmentSlot: EquipmentSlot.ARM,
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Brass Bracelet'
 }]
 
 const items: IGameItemAttributes[] = []
 
 function addItemPack(
 	anItemPack: Array<{
+		equipmentSlot: EquipmentSlot,
+		itemType: GameItemType,
 		name: string
 	}>,
 	coordinates: IObjectCoordinates
@@ -231,15 +259,18 @@ addItemPack(fighterPack, {
 	y: 13
 })
 
-
 export const testZoneAttributes: IZoneAttributes = {
 	bosses: [{
-		coordinates: {
-			x: 7,
-			y: 6,
+		attributes: {
+			coordinates: {
+				x: 7,
+				y: 6,
+			},
+			maxHealth: 10,
+			maxMagic: 10,
 		},
-		maxHealth: 10,
-		maxMagic: 10,
+		coins: 10,
+		inventoryItems: []
 	}],
 	dimensions: {
 		x: 15,

@@ -69,14 +69,14 @@
         // 	})
     })
 
-    function onSignIn(playerAttributes) {
-        if (!playerAttributes) {
+    function onSignIn(playerData) {
+        if (!playerData || !playerData.state) {
             return;
         }
-        player = new GamePlayer(playerAttributes);
+        player = new GamePlayer(playerData.state);
         testZone.add(player);
+        inventory.set(playerData.state.inventoryItems);
         updateFromServer().then()
-        getInventory().then()
     }
 
     onDestroy(() => {
@@ -119,7 +119,7 @@
     async function getUpdates() {
         const data = await getData('api/updates?playerId=' + player.attributes.id
                 + '&lastUpdateSecond=' + lastUpdateSecond);
-        if(!data) {
+        if (!data) {
             return;
         }
         testZone.updateObjects(data.zone.dimensions,
@@ -187,7 +187,7 @@
         }
 
         setCredentials(inputData);
-        onSignIn(data.attributes);
+        onSignIn(data);
         showSignIn.set(false);
 
         return true;
@@ -205,7 +205,7 @@
             return false;
         }
         setCredentials(inputData);
-        onSignIn(data.attributes);
+        onSignIn(data);
         showSignIn.set(false);
 
         return true;
@@ -309,15 +309,10 @@
     async function doTradeDealReply(
             inputData
     ) {
-        const data = await putData('api/tradeDealReply', {
+        await putData('api/tradeDealReply', {
             playerId: player.attributes.id,
             ...inputData
         }, tradeDealError);
-        if (!data) {
-            return;
-        }
-
-        // TODO: implement
     }
 
     function tradeDealChange(
@@ -330,15 +325,10 @@
     async function doTradeDealChange(
             inputData
     ) {
-        const data = await putData('api/tradeDealChange', {
+        await putData('api/tradeDealChange', {
             playerId: player.attributes.id,
             ...inputData
         }, tradeDealError);
-        if (!data) {
-            return;
-        }
-
-        // TODO: implement
     }
 
     function tradeDealCancel(
@@ -350,15 +340,10 @@
     async function doTradeDealCancel(
             inputData
     ) {
-        const data = await putData('api/tradeDealCancel', {
+        await putData('api/tradeDealCancel', {
             playerId: player.attributes.id,
             ...inputData
         }, tradeDealError);
-        if (!data) {
-            return;
-        }
-
-        // TODO: implement
     }
 
     function tradeDealCommit(
@@ -370,15 +355,40 @@
     async function doTradeDealCommit(
             inputData
     ) {
-        const data = await putData('api/tradeDealCommit', {
+        await putData('api/tradeDealCommit', {
             playerId: player.attributes.id,
             ...inputData
         }, tradeDealError);
-        if (!data) {
-            return;
-        }
+    }
 
-        // TODO: implement
+    function equipItem(
+        event
+    ) {
+        doEquipItem(event.detail).then()
+    }
+
+    async function doEquipItem(
+        inputData
+    ) {
+        await putData('api/equipItem', {
+            playerId: player.attributes.id,
+            ...inputData
+        })
+    }
+
+    function unequipItem(
+        event
+    ) {
+        doUnequipItem(event.detail).then()
+    }
+
+    async function doUnequipItem(
+            inputData
+    ) {
+        await putData('api/unequipItem', {
+            playerId: player.attributes.id,
+            ...inputData
+        })
     }
 
     async function getData(

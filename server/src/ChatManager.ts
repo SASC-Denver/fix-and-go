@@ -43,7 +43,7 @@ export class ChatManager
 			this.recentChat[this.recentChat.length - 1].messages.push({
 				id: ++this.lastMessageId,
 				text: data.text,
-				username: player.attributes.username
+				username: player.state.attributes.username
 			})
 
 			return {}

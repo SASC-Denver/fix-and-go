@@ -1,8 +1,12 @@
 import {
 	CredentialsChecker,
 	error,
+	GameItem,
 	GamePlayer,
+	IEquipItemRequest,
+	IEquipItemResponse,
 	IGamePlayerAttributes,
+	IGamePlayerState,
 	IInventoryRequest,
 	IInventoryResponse,
 	IResetPasswordRequest,
@@ -11,7 +15,9 @@ import {
 	ISignInRequest,
 	ISignInResponse,
 	ISignUpRequest,
-	ISignUpResponse
+	ISignUpResponse,
+	IUnequipItemRequest,
+	IUnequipItemResponse
 }                        from '@fix-and-go/logic'
 import {AbstractManager} from './AbstractManager'
 import {UserDao}         from './db/dao/UserDao'
@@ -53,10 +59,17 @@ export class PlayerManager
 			username: signUpRequest.username
 		}
 
+		const state: IGamePlayerState = {
+			attributes,
+			coins: 0,
+			equipmentState: null,
+			inventoryItems: [],
+		}
+
 		try {
 			const user = await this.userDao.createUser(
 				signUpRequest.username, signUpRequest.encodedEmail,
-				signUpRequest.encodedPassword, attributes)
+				signUpRequest.encodedPassword, state)
 
 			// console.log(JSON.stringify(user, null, '\t'))
 
@@ -100,9 +113,59 @@ export class PlayerManager
 			player: GamePlayer
 		) => {
 			return {
-				inventory: player.inventory.items,
-				purse: player.purse.coins
+				inventory: player.state.inventoryItems,
+				purse: player.state.coins
 			} as IInventoryResponse
+		})
+	}
+
+	equipItem(
+		request: IEquipItemRequest
+	): IResponse | IEquipItemResponse {
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
+			return player.inventory.peekItemSafe(request.item, (
+				item: GameItem
+			) => {
+				const result = player.equipment.equip(item)
+
+				if (!result.success) {
+					return error('Item is not a piece of equipment')
+				}
+
+				if (result.unequippedItem) {
+					player.inventory.addItem(result.unequippedItem)
+				}
+
+				return {
+					success: true
+				} as IEquipItemResponse
+			})
+		})
+	}
+
+	unequipItem(
+		request: IUnequipItemRequest
+	): IResponse | IUnequipItemResponse {
+		return this.playerSafe(request, (
+			player: GamePlayer
+		) => {
+			if (player.inventory.maxSize <= player.state.inventoryItems.length) {
+				return error('Inventory is full')
+			}
+
+			const removedItem = player.equipment.unequip(request.equipmentSlot)
+
+			if (!removedItem) {
+				return error('No Item equipped at slot ' + request.equipmentSlot)
+			}
+
+			player.inventory.addItem(removedItem)
+
+			return {
+				success: true
+			} as IEquipItemResponse
 		})
 	}
 
@@ -110,11 +173,11 @@ export class PlayerManager
 		user: IUser
 	): ISignInResponse | ISignUpResponse {
 		// console.log(JSON.stringify(user, null, 2))
-		user.attributes.id = user.id
+		user.state.attributes.id = user.id
 
 		// console.log('Player id: ' + user.id)
 
-		const newPlayer = new GamePlayer(user.attributes)
+		const newPlayer = new GamePlayer(user.state)
 		const result    = this.coordinator.zoneManager.addPlayer(newPlayer)
 
 		if (result && typeof result === 'boolean') {
@@ -122,7 +185,7 @@ export class PlayerManager
 		}
 
 		return {
-			attributes: user.attributes
+			state: user.state
 		}
 	}
 

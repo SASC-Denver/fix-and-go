@@ -1,8 +1,8 @@
-import {IGamePlayerAttributes} from '@fix-and-go/logic'
+import {IGamePlayerState} from '@fix-and-go/logic'
 
 export interface IUser {
 
-	attributes?: IGamePlayerAttributes;
+	state?: IGamePlayerState;
 	encodedEmail?: string;
 	id?: number;
 	encodedPassword?: string;

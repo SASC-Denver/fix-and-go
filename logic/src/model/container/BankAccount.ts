@@ -8,17 +8,17 @@ export class BankAccount
 	allToPurse(
 		purse: Purse
 	): void {
-		const coinsToTransfer = this.coins
-		this.coins            = 0
-		this.coins = purse.add(coinsToTransfer)
+		const coinsToTransfer = this.state.coins
+		this.state.coins            = 0
+		this.state.coins = purse.add(coinsToTransfer)
 	}
 
 	allFromPurse(
 		purse: Purse
 	): void {
-		const coinsToTransfer = purse.coins
-		purse.coins           = 0
-		purse.coins = this.add(coinsToTransfer)
+		const coinsToTransfer = purse.state.coins
+		purse.state.coins           = 0
+		purse.state.coins = this.add(coinsToTransfer)
 	}
 
 }

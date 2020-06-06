@@ -155,7 +155,7 @@ export class ZoneManager
 					[player.attributes.coordinates.y][player.attributes.coordinates.x]
 
 				return {
-					inventory: player.inventory.items,
+					inventory: player.state.inventoryItems,
 					zoneItems: items.map(item => item.attributes as IGameItemAttributes)
 				} as IInspectItemsResponse
 			})
@@ -169,7 +169,7 @@ export class ZoneManager
 			player: GamePlayer
 		) => {
 
-			if (player.inventory.items.length >= player.inventory.maxSize) {
+			if (player.state.inventoryItems.length >= player.inventory.maxSize) {
 				return error('Inventory is full')
 			}
 
@@ -200,7 +200,7 @@ export class ZoneManager
 				player.inventory.addItem(item)
 
 				return {
-					inventory: player.inventory.items,
+					inventory: player.state.inventoryItems,
 					zoneItems: zoneItems.map(anItem => anItem.attributes as IGameItemAttributes)
 				} as IPickUpItemResponse
 			})
@@ -240,7 +240,7 @@ export class ZoneManager
 
 			return this.coordinator.tradeManager.tradeDealSafe(player, () => {
 				return {
-					inventory: player.inventory.items,
+					inventory: player.state.inventoryItems,
 					zoneItems: items.map(anItem => anItem.attributes as IGameItemAttributes)
 				} as IDropItemResponse
 			})

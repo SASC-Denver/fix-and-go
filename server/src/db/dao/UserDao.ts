@@ -1,10 +1,10 @@
-import {IGamePlayerAttributes} from '@fix-and-go/logic'
+import {IGamePlayerState} from '@fix-and-go/logic'
 import {
 	find,
 	run
-}                              from '../DbDriver'
-import {IUser}                 from '../model/User'
-import {IDao}                  from './Dao'
+}                         from '../DbDriver'
+import {IUser}            from '../model/User'
+import {IDao}             from './Dao'
 
 export class UserDao
 	implements IDao {
@@ -34,7 +34,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_encoded_email_uidx
 		username: string,
 		encodedEmail: string,
 		encodedPassword: string,
-		attributes: IGamePlayerAttributes,
+		state: IGamePlayerState,
 	): Promise<IUser> {
 		const existingUsers = await this.findByUsernameOrEncodedEmail(
 			username, encodedEmail)
@@ -53,9 +53,7 @@ INSERT INTO users
   (username, encoded_email, encoded_password, state)
 VALUES
   (?, ?, ?, ?)`, username, encodedEmail,
-			encodedPassword, JSON.stringify({
-				attributes
-			}))
+			encodedPassword, JSON.stringify(state))
 
 		return await this.findByEncodedEmail(encodedEmail)
 	}
@@ -94,7 +92,7 @@ WHERE
 		// console.log(JSON.stringify(records, null, 2))
 		if (records && records.length) {
 			// console.log(JSON.stringify(records, null, 2))
-			records[0].attributes = JSON.parse(records[0].state).attributes
+			records[0].state = JSON.parse(records[0].state)
 
 			return records[0] as IUser
 		}

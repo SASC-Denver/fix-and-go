@@ -47,6 +47,7 @@ export interface ITradeDealAttributes {
 }
 
 export class TradeDeal {
+
 	attributes: ITradeDealAttributes
 	parties: {
 		initiator: GamePlayer;
@@ -74,7 +75,7 @@ export class TradeDeal {
 						committed: false,
 						items: []
 					},
-					username: initiator.attributes.username
+					username: initiator.state.attributes.username
 				},
 				receiver: {
 					id: receiver.attributes.id,
@@ -83,7 +84,7 @@ export class TradeDeal {
 						committed: false,
 						items: []
 					},
-					username: receiver.attributes.username
+					username: receiver.state.attributes.username
 				}
 			},
 			state: TradeDealState.REQUESTED,

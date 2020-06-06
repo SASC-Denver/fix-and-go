@@ -58,7 +58,7 @@ export class TradeManager
 		}
 
 		if (receiver.tradeDeal) {
-			return error(`${receiver.attributes.username} is already trading.`)
+			return error(`${receiver.state.attributes.username} is already trading.`)
 		}
 
 		const initiatorCoords = initiator.attributes.coordinates
@@ -226,10 +226,10 @@ export class TradeManager
 			                  = getTradeSide(tradeDeal.attributes, false, player)
 
 			if (player.inventory.maxSize <
-				player.inventory.items.length + otherPlayerTradeDealSide.offer.items.length) {
+				player.state.inventoryItems.length + otherPlayerTradeDealSide.offer.items.length) {
 				return error(`Cannot commit to trade, your inventory is too full to accept all new items`)
 			}
-			if (playerTradeDealSide.offer.coins > player.purse.coins) {
+			if (playerTradeDealSide.offer.coins > player.state.coins) {
 				return error(`Cannot commit to trade, you have fewer coins than you offered`)
 			}
 
@@ -243,11 +243,11 @@ export class TradeManager
 				) => {
 					if (otherPlayerTradeDealSide.offer.committed) {
 						if (otherPlayer.inventory.maxSize <
-							otherPlayer.inventory.items.length + playerTradeDealSide.offer.items.length) {
-							return error(`Cannot commit to trade, "${otherPlayer.attributes.username}" inventory is too full to accept all new items`)
+							otherPlayer.state.inventoryItems.length + playerTradeDealSide.offer.items.length) {
+							return error(`Cannot commit to trade, "${otherPlayer.state.attributes.username}" inventory is too full to accept all new items`)
 						}
-						if (otherPlayerTradeDealSide.offer.coins > otherPlayer.purse.coins) {
-							return error(`Cannot commit to trade, "${otherPlayer.attributes.username}" has fewer coins than they offered`)
+						if (otherPlayerTradeDealSide.offer.coins > otherPlayer.state.coins) {
+							return error(`Cannot commit to trade, "${otherPlayer.state.attributes.username}" has fewer coins than they offered`)
 						}
 						// console.log('other player:')
 						return this.inventoryStateSafe(
@@ -268,9 +268,9 @@ export class TradeManager
 								otherPlayerItemsToRemove.forEach(item => {
 									player.inventory.addItem(item)
 								})
-								otherPlayer.purse.coins += playerTradeDealSide.offer.coins
+								otherPlayer.state.coins += playerTradeDealSide.offer.coins
 									- otherPlayerTradeDealSide.offer.coins
-								player.purse.coins += otherPlayerTradeDealSide.offer.coins
+								player.state.coins += otherPlayerTradeDealSide.offer.coins
 									- playerTradeDealSide.offer.coins
 
 								tradeDeal.attributes.state = TradeDealState.COMPLETED

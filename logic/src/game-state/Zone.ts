@@ -6,7 +6,8 @@ import {
 }                              from '../model/game'
 import {
 	GameBoss,
-	IGameBossAttributes
+	IGameBossAttributes,
+	IGameBossState
 }                              from '../model/GameBoss'
 import {
 	GameItem,
@@ -36,7 +37,7 @@ export interface IZoneDimensions {
 }
 
 export interface IZoneAttributes {
-	bosses: IGameBossAttributes[];
+	bosses: IGameBossState[];
 	dimensions: IZoneDimensions;
 	items: IGameItemAttributes[];
 	obstacles: IObstacleAttributes[];
@@ -92,9 +93,9 @@ export class Zone {
 
 		if (attributes.bosses) {
 			for (let i = 0; i < attributes.bosses.length; i++) {
-				const bossAttributes = attributes.bosses[i]
-				bossAttributes.id    = ++Zone.lastObjectId
-				this.add(new GameBoss(bossAttributes))
+				const bossState         = attributes.bosses[i]
+				bossState.attributes.id = ++Zone.lastObjectId
+				this.add(new GameBoss(bossState))
 			}
 		}
 
@@ -153,7 +154,11 @@ export class Zone {
 		attributesList.forEach(attributes => {
 			switch (attributes.type) {
 				case GameObjectType.BOSS:
-					this.add(new GameBoss(attributes as IGameBossAttributes))
+					this.add(new GameBoss({
+						attributes: attributes as IGameBossAttributes,
+						coins: 0,
+						inventoryItems: []
+					}))
 					break
 				case GameObjectType.ITEM:
 					this.add(new GameItem(attributes as IGameItemAttributes))
@@ -167,7 +172,12 @@ export class Zone {
 						player.attributes = attributes as IGamePlayerAttributes
 						newPlayer         = player
 					} else {
-						newPlayer = new GamePlayer(attributes as IGamePlayerAttributes)
+						newPlayer = new GamePlayer({
+							attributes: attributes as IGamePlayerAttributes,
+							coins: 0,
+							equipmentState: null,
+							inventoryItems: []
+						})
 					}
 					this.add(newPlayer)
 					break

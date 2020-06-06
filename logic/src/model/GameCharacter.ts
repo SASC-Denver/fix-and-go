@@ -1,10 +1,17 @@
-import {Inventory}      from './container/Inventory'
-import {Purse}          from './container/Purse'
-import {GameObjectType} from './game'
+import {Inventory}           from './container/Inventory'
+import {Purse}               from './container/Purse'
+import {GameObjectType}      from './game'
+import {IGameItemAttributes} from './GameItem'
 import {
 	GameObject,
 	IGameObjectAttributes
-}                       from './GameObject'
+}                            from './GameObject'
+
+export interface IGameCharacterState {
+	attributes: IGameCharacterAttributes
+	inventoryItems: IGameItemAttributes[]
+	coins: number
+}
 
 export interface IGameCharacterAttributes
 	extends IGameObjectAttributes {
@@ -20,9 +27,8 @@ export interface IGameCharacterAttributes
 export class GameCharacter
 	extends GameObject {
 
-	attributes: IGameCharacterAttributes
-	inventory: Inventory = new Inventory()
-	purse: Purse         = new Purse()
+	inventory: Inventory
+	purse: Purse
 
 	visionRange: {
 		high: {
@@ -46,9 +52,14 @@ export class GameCharacter
 
 	constructor(
 		type: GameObjectType,
-		attributes: IGameCharacterAttributes
+		state: IGameCharacterState,
 	) {
-		super(type, attributes)
+		super(type, state.attributes)
+
+		this.inventory = new Inventory(state)
+		this.purse     = new Purse(state)
+
+		const attributes = state.attributes
 
 		if (!attributes.health) {
 			attributes.health = attributes.maxHealth
@@ -56,15 +67,6 @@ export class GameCharacter
 		if (!attributes.magic) {
 			attributes.magic = attributes.maxMagic
 		}
-	}
-
-	/**
-	 * Attack a particular character
-	 *
-	 * @param characterToAttack  The character to attack.
-	 */
-	attack(characterToAttack: GameCharacter): boolean {
-		throw new Error('Not implemented')
 	}
 
 }

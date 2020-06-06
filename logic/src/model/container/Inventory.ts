@@ -1,16 +1,17 @@
-import {error}     from '../../utils/network'
+import {error}               from '../../utils/network'
 import {
 	GameObjectType,
 	IGameObject,
 	IObjectDirectory,
-}                  from '../game'
+}                            from '../game'
+import {IGameCharacterState} from '../GameCharacter'
 import {
 	GameItem,
 	IGameItemAttributes,
 	IGameItemIdentifier,
 	itemIdentifierSafe
-}                  from '../GameItem'
-import {IResponse} from '../network/data'
+}                            from '../GameItem'
+import {IResponse}           from '../network/data'
 
 /**
  * An inventory of objects for a player or a store.
@@ -22,15 +23,19 @@ export class Inventory {
 	 */
 	objectsDirectory: IObjectDirectory = {}
 
-	items: IGameItemAttributes[] = []
-
 	/**
 	 * Creates a new instance of an inventory
 	 */
 	constructor(
+		public state: IGameCharacterState,
 		public maxSize = 20
 	) {
-		// Implement
+		if (!state.inventoryItems) {
+			state.inventoryItems = []
+		}
+		for (const item of state.inventoryItems) {
+			this.addItem(new GameItem(item))
+		}
 	}
 
 	/**
@@ -41,7 +46,7 @@ export class Inventory {
 	addItem(
 		inventoryItem: IGameObject
 	): boolean {
-		if (this.items.length >= this.maxSize) {
+		if (this.state.inventoryItems.length >= this.maxSize) {
 			return false
 		}
 		const itemAttributes = inventoryItem.attributes as IGameItemAttributes
@@ -56,7 +61,7 @@ export class Inventory {
 		}
 
 		directoryForType[itemAttributes.id] = inventoryItem
-		this.items.push(itemAttributes)
+		this.state.inventoryItems.push(itemAttributes)
 
 		return true
 	}
@@ -82,7 +87,7 @@ export class Inventory {
 		}
 
 		delete directoryForType[gameObjectId]
-		this.items = this.items.filter(anItem =>
+		this.state.inventoryItems = this.state.inventoryItems.filter(anItem =>
 			!(anItem.type === gameObjectType && anItem.id === gameObjectId))
 
 		return item

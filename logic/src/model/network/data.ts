@@ -1,10 +1,11 @@
+import {EquipmentSlot}       from '../container/Equipment'
+import {TradeDealChangeType} from '../container/TradeDeal'
+import {GameObjectType}      from '../game'
 import {
-	IGameItemIdentifier,
-	TradeDealChangeType
-}                              from '../..'
-import {GameObjectType}        from '../game'
-import {IGameItemAttributes}   from '../GameItem'
-import {IGamePlayerAttributes} from '../GamePlayer'
+	IGameItemAttributes,
+	IGameItemIdentifier
+}                            from '../GameItem'
+import {IGamePlayerState}    from '../GamePlayer'
 
 export enum ErrorCode {
 	INVALID_REQUEST,
@@ -33,7 +34,7 @@ export interface ISignUpRequest
 
 export interface ISignUpResponse
 	extends IResponse {
-	attributes: IGamePlayerAttributes
+	state: IGamePlayerState
 }
 
 export interface ISignInRequest
@@ -44,7 +45,7 @@ export interface ISignInRequest
 
 export interface ISignInResponse
 	extends IResponse {
-	attributes: IGamePlayerAttributes
+	state: IGamePlayerState
 }
 
 export interface IResetPasswordRequest
@@ -180,4 +181,24 @@ export interface ITradeDealCommitRequest
 
 export interface ITradeDealCommitResponse
 	extends IResponse {
+}
+
+export interface IEquipItemRequest
+	extends IRequest {
+	item?: IGameItemIdentifier;
+}
+
+export interface IEquipItemResponse
+	extends IResponse {
+	success: boolean
+}
+
+export interface IUnequipItemRequest
+	extends IRequest {
+	equipmentSlot: EquipmentSlot
+}
+
+export interface IUnequipItemResponse
+	extends IResponse {
+	success: boolean
 }

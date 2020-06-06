@@ -1,19 +1,28 @@
+import {IGameCharacterState} from '../GameCharacter'
+
 export class Purse {
 
-	coins           = 0
 	maximumCapacity = 500000
+
+	constructor(
+		public state: IGameCharacterState
+	) {
+		if (!this.state.coins) {
+			this.state.coins = 0
+		}
+	}
 
 	add(
 		someCoins: number
 	): number {
-		if (this.coins + someCoins > this.maximumCapacity) {
-			const remainder = this.coins + someCoins - this.maximumCapacity
-			this.coins      = this.maximumCapacity
+		if (this.state.coins + someCoins > this.maximumCapacity) {
+			const remainder  = this.state.coins + someCoins - this.maximumCapacity
+			this.state.coins = this.maximumCapacity
 
 			return remainder
 		}
 
-		this.coins += someCoins
+		this.state.coins += someCoins
 
 		return 0
 	}
@@ -21,11 +30,11 @@ export class Purse {
 	remove(
 		someCoins: number
 	): boolean {
-		if (someCoins > this.coins) {
+		if (someCoins > this.state.coins) {
 			return false
 		}
 
-		this.coins -= someCoins
+		this.state.coins -= someCoins
 
 		return true
 	}

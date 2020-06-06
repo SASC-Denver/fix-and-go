@@ -155,6 +155,20 @@ fastify.put('/api/tradeDealCommit', async (
 	return tradeManager.tradeDealCommit(request.body)
 })
 
+fastify.put('/api/equipItem', async (
+	request,
+	reply
+) => {
+	return null
+})
+
+fastify.put('/api/unequipItem', async (
+	request,
+	reply
+) => {
+	return null
+})
+
 function initGame(): void {
 	chatManager               = new ChatManager()
 	playerManager             = new PlayerManager()

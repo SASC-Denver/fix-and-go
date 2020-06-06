@@ -1,11 +1,17 @@
 import {GameObjectType} from './game'
 import {
 	GameCharacter,
-	IGameCharacterAttributes
+	IGameCharacterAttributes,
+	IGameCharacterState
 }                       from './GameCharacter'
 
+export interface IGameBossState
+	extends IGameCharacterState {
+	attributes: IGameBossAttributes
+}
+
 export interface IGameBossAttributes
-extends IGameCharacterAttributes {
+	extends IGameCharacterAttributes {
 	type?: GameObjectType.BOSS
 }
 
@@ -15,12 +21,10 @@ extends IGameCharacterAttributes {
 export class GameBoss
 	extends GameCharacter {
 
-	attributes: IGameBossAttributes
-
 	constructor(
-		attributes: IGameBossAttributes
+		public state: IGameBossState
 	) {
-		super(GameObjectType.BOSS, attributes);
+		super(GameObjectType.BOSS, state)
 	}
 
 }
