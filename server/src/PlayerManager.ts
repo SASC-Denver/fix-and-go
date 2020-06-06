@@ -96,6 +96,13 @@ export class PlayerManager
 			return error('Password does not match')
 		}
 
+		const loggedInPlayer = this.players[user.id]
+		if (loggedInPlayer) {
+			return {
+				state: loggedInPlayer.state
+			}
+		}
+
 		return this.addPlayer(user)
 	}
 
@@ -113,7 +120,7 @@ export class PlayerManager
 			player: GamePlayer
 		) => {
 			return {
-				inventory: player.state.inventoryItems,
+				inventoryItems: player.state.inventoryItems,
 				purse: player.state.coins
 			} as IInventoryResponse
 		})
@@ -134,11 +141,15 @@ export class PlayerManager
 					return error('Item is not a piece of equipment')
 				}
 
+				player.inventory.removeItem(item.attributes.type, item.attributes.id)
+
 				if (result.unequippedItem) {
 					player.inventory.addItem(result.unequippedItem)
 				}
 
 				return {
+					equipmentState: player.state.equipmentState,
+					inventoryItems: player.state.inventoryItems,
 					success: true
 				} as IEquipItemResponse
 			})
@@ -164,6 +175,8 @@ export class PlayerManager
 			player.inventory.addItem(removedItem)
 
 			return {
+				equipmentState: player.state.equipmentState,
+				inventoryItems: player.state.inventoryItems,
 				success: true
 			} as IEquipItemResponse
 		})

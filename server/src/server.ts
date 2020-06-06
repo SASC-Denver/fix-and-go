@@ -159,14 +159,14 @@ fastify.put('/api/equipItem', async (
 	request,
 	reply
 ) => {
-	return null
+	return playerManager.equipItem(request.body)
 })
 
 fastify.put('/api/unequipItem', async (
 	request,
 	reply
 ) => {
-	return null
+	return playerManager.unequipItem(request.body)
 })
 
 function initGame(): void {

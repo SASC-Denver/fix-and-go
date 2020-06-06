@@ -9,36 +9,79 @@ import {
 	IGameItemAttributes
 }                        from '../model/GameItem'
 
-const fighterPack = [{
-	equipmentSlot: EquipmentSlot.HEAD,
+const fighterPack: Array<{
+	equipmentSlot: EquipmentSlot,
+	itemType: GameItemType,
+	name: string
+}> = [{
+	equipmentSlot: 'head',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Helmet'
 }, {
-	equipmentSlot: EquipmentSlot.FEET,
+	equipmentSlot: 'feet',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Boots'
 }, {
-	equipmentSlot: EquipmentSlot.BODY,
+	equipmentSlot: 'body',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Armor'
 }, {
-	equipmentSlot: EquipmentSlot.LEGS,
+	equipmentSlot: 'legs',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Leather Leggings'
 }, {
-	equipmentSlot: EquipmentSlot.WIELD,
+	equipmentSlot: 'wield',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Broadsword'
 }, {
-	equipmentSlot: EquipmentSlot.HOLD,
+	equipmentSlot: 'hold',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Wooden Shield'
 }, {
-	equipmentSlot: EquipmentSlot.LIGHT,
+	equipmentSlot: 'light',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Torch'
 }, {
-	equipmentSlot: EquipmentSlot.ARM,
+	equipmentSlot: 'arm',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Brass Wrist Guard'
+}]
+
+
+const fighterPack2: Array<{
+	equipmentSlot: EquipmentSlot,
+	itemType: GameItemType,
+	name: string
+}> = [{
+	equipmentSlot: 'head',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Leather Helmet2'
+}, {
+	equipmentSlot: 'feet',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Leather Boots2'
+}, {
+	equipmentSlot: 'body',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Leather Armor2'
+}, {
+	equipmentSlot: 'legs',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Leather Leggings2'
+}, {
+	equipmentSlot: 'wield',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Broadsword2'
+}, {
+	equipmentSlot: 'hold',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Wooden Shield2'
+}, {
+	equipmentSlot: 'light',
+	itemType: GameItemType.EQUIPMENT,
+	name: 'Torch2'
+}, {
+	equipmentSlot: 'arm',
 	itemType: GameItemType.EQUIPMENT,
 	name: 'Brass Bracelet'
 }]
@@ -59,6 +102,7 @@ function addItemPack(
 			coordinates: {
 				...coordinates
 			},
+			itemType: GameItemType.EQUIPMENT,
 			type: GameObjectType.ITEM
 		})
 	})
@@ -117,7 +161,7 @@ addItemPack(fighterPack, {
 	x: 7,
 	y: 8
 })
-addItemPack(fighterPack, {
+addItemPack(fighterPack2, {
 	x: 8,
 	y: 8
 })
@@ -270,6 +314,7 @@ export const testZoneAttributes: IZoneAttributes = {
 			maxMagic: 10,
 		},
 		coins: 10,
+
 		inventoryItems: []
 	}],
 	dimensions: {

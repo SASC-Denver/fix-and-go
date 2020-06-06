@@ -1,5 +1,4 @@
 import {error}          from '../utils/network'
-import {EquipmentSlot}  from './container/Equipment'
 import {GameObjectType} from './game'
 import {
 	GameObject,
@@ -18,6 +17,7 @@ export interface IGameItemIdentifier {
 	id: number
 	name?: string
 	type: GameObjectType.ITEM
+	itemType: GameItemType
 }
 
 export interface IGameItemAttributes
@@ -25,11 +25,6 @@ export interface IGameItemAttributes
 	name: string
 	type: GameObjectType.ITEM
 	itemType: GameItemType
-}
-
-export interface IEquipmentAttributes
-	extends IGameItemAttributes {
-	equipmentSlot: EquipmentSlot
 }
 
 export function isValidItemType(

@@ -141,8 +141,9 @@ export class TradeManager
 
 						playerTradeDealSide.offer.items.push({
 							id: item.attributes.id,
+							itemType: item.attributes.itemType,
 							name: item.attributes.name,
-							type: item.attributes.type
+							type: item.attributes.type,
 						})
 						playerTradeDealSide.offer.committed      = false
 						otherPlayerTradeDealSide.offer.committed = false

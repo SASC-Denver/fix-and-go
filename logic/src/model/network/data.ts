@@ -1,4 +1,7 @@
-import {EquipmentSlot}       from '../container/Equipment'
+import {
+	EquipmentSlot,
+	IEquipmentState
+}                            from '../container/Equipment'
 import {TradeDealChangeType} from '../container/TradeDeal'
 import {GameObjectType}      from '../game'
 import {
@@ -91,7 +94,7 @@ export interface IInventoryRequest
 
 export interface IInventoryResponse
 	extends IResponse {
-	inventory: IGameItemAttributes[]
+	inventoryItems: IGameItemAttributes[]
 }
 
 export interface IInspectItemsRequest
@@ -190,6 +193,8 @@ export interface IEquipItemRequest
 
 export interface IEquipItemResponse
 	extends IResponse {
+	equipmentState: IEquipmentState
+	inventoryItems: IGameItemAttributes[]
 	success: boolean
 }
 
@@ -200,5 +205,7 @@ export interface IUnequipItemRequest
 
 export interface IUnequipItemResponse
 	extends IResponse {
+	equipmentState: IEquipmentState
+	inventoryItems: IGameItemAttributes[]
 	success: boolean
 }

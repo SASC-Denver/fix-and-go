@@ -203,6 +203,8 @@
 <style>
     .map {
         border-collapse: collapse;
+        border-bottom: 1px dashed black;
+        border-left: 1px dashed black;
     }
 
     .map td {
@@ -210,14 +212,8 @@
     }
 
     .map td div {
-        align-content: center;
-        display: flex;
-        flex-direction: column;
-        height: 50px;
-        justify-content: center;
-        overflow: hidden;
-        text-align: center;
-        word-break: break-all;
+        border-top: 1px dashed black;
+        border-right: 1px dashed black;
     }
 
     .map td.selected {

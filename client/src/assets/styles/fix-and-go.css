@@ -1,5 +1,15 @@
 td {
-    border: 1px dashed black;
     height: 50px;
     width: 50px;
+}
+
+td div {
+    align-content: center;
+    display: flex;
+    flex-direction: column;
+    height: 50px;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    word-break: break-all;
 }

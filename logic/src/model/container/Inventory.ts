@@ -30,10 +30,13 @@ export class Inventory {
 		public state: IGameCharacterState,
 		public maxSize = 20
 	) {
-		if (!state.inventoryItems) {
-			state.inventoryItems = []
+		let inventoryItems = state.inventoryItems
+		if (!inventoryItems) {
+			inventoryItems = []
 		}
-		for (const item of state.inventoryItems) {
+		state.inventoryItems = []
+
+		for (const item of inventoryItems) {
 			this.addItem(new GameItem(item))
 		}
 	}

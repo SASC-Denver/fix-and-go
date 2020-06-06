@@ -9,15 +9,18 @@
 
     let inventoryItems = [];
 
-    $: itemRows = getItemRows(inventoryItems, 5, 4);
-
     $: inventoryItems = computeInventoryItems($inventory, filter)
+    $: itemRows = getItemRows(inventoryItems, 5, 4);
 
     onMount(async () => {
     })
 
     onDestroy(() => {
     })
+
+    function hasItem(item) {
+        return !!item;
+    }
 
     let render = renderItem;
 
@@ -39,23 +42,20 @@
             return;
         }
 
-        dispatch('selectInventoryItem', {
-            id: item.id,
-            type: item.type
-        });
+        dispatch('select', item);
     }
 
 </script>
 <style>
+    table {
+        border: 1px solid black;
+    }
     td div {
-        align-content: center;
-        display: flex;
-        flex-direction: column;
-        height: 50px;
-        justify-content: center;
-        overflow: hidden;
-        text-align: center;
-        word-break: break-all;
+        border: 1px dotted black;
+    }
+
+    td div.hasItem {
+        border: 1px solid black;
     }
 </style>
 <table>
@@ -63,7 +63,9 @@
     <tr>
         {#each itemRow as item}
         <td on:click|stopPropagation="{event => selectInventoryItem(item)}">
-            <div>
+            <div
+                    class:hasItem="{hasItem(item)}"
+            >
                 {render(item)}
             </div>
         </td>

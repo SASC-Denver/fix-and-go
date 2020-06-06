@@ -22,10 +22,14 @@
         showItemsUnsubscribe();
     })
 
+    function hasItem(item) {
+        return !!item;
+    }
+
     let render = renderItem
 
     function pickUpZoneItem(
-        item
+            item
     ) {
         if (!item) {
             return
@@ -38,7 +42,7 @@
     }
 
     function dropItemToZone(
-        event
+            event
     ) {
         dispatch('dropItemToZone', event.detail);
     }
@@ -61,14 +65,11 @@
     }
 
     td div {
-        align-content: center;
-        display: flex;
-        flex-direction: column;
-        height: 50px;
-        justify-content: center;
-        overflow: hidden;
-        text-align: center;
-        word-break: break-all;
+        border: 1px dotted black;
+    }
+
+    td div.hasItem {
+        border: 1px solid black;
     }
 
     .error {
@@ -87,26 +88,28 @@
     </div>
     <div slot="content">
         {#if $zoneItemsError}
-        <div
-                class="error"
-        >
-            {$zoneItemsError.value}
-        </div>
+            <div
+                    class="error"
+            >
+                {$zoneItemsError.value}
+            </div>
         {/if}
         <br>
         <section>
             <aside>
                 <table>
                     {#each itemRows as itemRow}
-                    <tr>
-                        {#each itemRow as item}
-                        <td on:click|stopPropagation="{event => pickUpZoneItem(item)}">
-                            <div>
-                                {render(item)}
-                            </div>
-                        </td>
-                        {/each}
-                    </tr>
+                        <tr>
+                            {#each itemRow as item}
+                                <td on:click|stopPropagation="{event => pickUpZoneItem(item)}">
+                                    <div
+                                            class:hasItem="{hasItem(item)}"
+                                    >
+                                        {render(item)}
+                                    </div>
+                                </td>
+                            {/each}
+                        </tr>
                     {/each}
                 </table>
             </aside>

@@ -1,6 +1,7 @@
 <script>
     import {
         ErrorCode,
+        GameItemType,
         GameObjectType,
         GamePlayer,
         isPlayerTheInitiator,
@@ -18,6 +19,7 @@
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
     import {
+        equipment,
         getCredentials,
         inventory,
         lastChatBatch,
@@ -75,7 +77,7 @@
         }
         player = new GamePlayer(playerData.state);
         testZone.add(player);
-        inventory.set(playerData.state.inventoryItems);
+        updateEquipmentAndInventory(playerData.state)
         updateFromServer().then()
     }
 
@@ -362,33 +364,54 @@
     }
 
     function equipItem(
-        event
+            event
     ) {
-        doEquipItem(event.detail).then()
+        const item = event.detail
+
+        if (item.itemType !== GameItemType.EQUIPMENT) {
+            return
+        }
+        doEquipItem(item).then()
     }
 
     async function doEquipItem(
-        inputData
+            item
     ) {
-        await putData('api/equipItem', {
+        const data = await putData('api/equipItem', {
             playerId: player.attributes.id,
-            ...inputData
+            item: {
+                id: item.id,
+                type: item.type,
+                itemType: item.itemType
+            }
         })
+        updateEquipmentAndInventory(data)
     }
 
     function unequipItem(
-        event
+            event
     ) {
         doUnequipItem(event.detail).then()
     }
 
     async function doUnequipItem(
-            inputData
+            equipmentSlot
     ) {
-        await putData('api/unequipItem', {
+        const data = await putData('api/unequipItem', {
             playerId: player.attributes.id,
-            ...inputData
+            equipmentSlot
         })
+        updateEquipmentAndInventory(data)
+    }
+
+    function updateEquipmentAndInventory(
+            data
+    ) {
+        if (!data) {
+            return
+        }
+        equipment.set(data.equipmentState)
+        inventory.set(data.inventoryItems)
     }
 
     async function getData(
@@ -478,6 +501,10 @@
 </script>
 
 <style>
+    td div {
+        border: 2px solid black;
+    }
+
     header {
         clear: both;
         margin: auto;
@@ -539,11 +566,17 @@
             <tr>
                 <td
                         on:click="{tradeDealStart}"
-                >Trade
+                >
+                    <div>
+                        Trade
+                    </div>
                 </td>
                 <td
                         on:click={inspectZoneItems}
-                >PickUp /Drop
+                >
+                    <div>
+                        PickUp /Drop
+                    </div>
                 </td>
                 <td> ...</td>
                 <td> ...</td>
@@ -572,9 +605,13 @@
         </section>
         <aside class="middle-right">
             <br>
-            <Equipment></Equipment>
+            <Equipment
+                    on:select="{unequipItem}"
+            ></Equipment>
             <br>
-            <Inventory></Inventory>
+            <Inventory
+                    on:select="{equipItem}"
+            ></Inventory>
         </aside>
     </main>
 </section>

@@ -1,5 +1,7 @@
 import {writable} from 'svelte/store'
+import {Equipment} from "@fix-and-go/logic";
 
+export let equipment = writable(Equipment.ensureEquipmentState(null))
 export let inventory = writable([])
 export let lastMessage = writable(null)
 export let lastChatBatch = writable([])

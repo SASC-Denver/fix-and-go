@@ -1,19 +1,11 @@
 import {
 	GameItem,
 	GameItemType,
-	IEquipmentAttributes
+	IGameItemAttributes
 } from '../GameItem'
 
-export enum EquipmentSlot {
-	ARM,
-	BODY,
-	FEET,
-	HEAD,
-	HOLD,
-	LEGS,
-	LIGHT,
-	WIELD,
-}
+export type EquipmentSlot =
+	'arm' | 'body' | 'feet' | 'head' | 'hold' | 'legs' | 'light' | 'wield'
 
 export interface IEquipmentState {
 	arm: IEquipmentAttributes;
@@ -24,6 +16,11 @@ export interface IEquipmentState {
 	legs: IEquipmentAttributes;
 	light: IEquipmentAttributes;
 	wield: IEquipmentAttributes;
+}
+
+export interface IEquipmentAttributes
+	extends IGameItemAttributes {
+	equipmentSlot: EquipmentSlot
 }
 
 export class Equipment {
@@ -66,14 +63,12 @@ export class Equipment {
 			}
 		}
 
-		const equipmentSlotName = this.getEquipmentSlotName(equipmentAttributes.equipmentSlot)
-
-		const equippedItemAttributes = this.equipmentState[equipmentSlotName]
+		const equippedItemAttributes = this.equipmentState[equipmentAttributes.equipmentSlot]
 		let unequippedItem: GameItem = null
 		if (equippedItemAttributes) {
 			unequippedItem = new GameItem(equippedItemAttributes)
 		}
-		this.equipmentState[equipmentSlotName] = equipmentAttributes
+		this.equipmentState[equipmentAttributes.equipmentSlot] = equipmentAttributes
 
 		return {
 			success: true,
@@ -84,15 +79,14 @@ export class Equipment {
 	unequip(
 		equipmentSlot: EquipmentSlot
 	): GameItem {
-		const equipmentSlotName = this.getEquipmentSlotName(equipmentSlot)
 
-		const equippedItemAttributes = this.equipmentState[equipmentSlotName]
+		const equippedItemAttributes = this.equipmentState[equipmentSlot]
 
 		if (!equippedItemAttributes) {
 			return null
 		}
 
-		this.equipmentState[equipmentSlotName] = null
+		this.equipmentState[equipmentSlot] = null
 
 		return new GameItem(equippedItemAttributes)
 	}
@@ -101,30 +95,6 @@ export class Equipment {
 		equipmentSlot: EquipmentSlot
 	): boolean {
 		return this.equipmentState[equipmentSlot] != null
-	}
-
-	private getEquipmentSlotName(
-		equipmentSlot: EquipmentSlot
-	): string {
-		switch (equipmentSlot) {
-			case EquipmentSlot.ARM:
-				return 'arm'
-			case EquipmentSlot.BODY:
-				return 'body'
-			case EquipmentSlot.FEET:
-				return 'feet'
-			case EquipmentSlot.HEAD:
-				return 'head'
-			case EquipmentSlot.HOLD:
-				return 'hold'
-			case EquipmentSlot.LEGS:
-				return 'legs'
-			case EquipmentSlot.LIGHT:
-				return 'light'
-			case EquipmentSlot.WIELD:
-				return 'wield'
-		}
-		return null
 	}
 
 }
