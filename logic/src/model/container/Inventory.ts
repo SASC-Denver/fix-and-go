@@ -1,8 +1,9 @@
 import {error}               from '../../utils/network'
 import {
 	addEquipmentPack,
+	debugPack,
 	starterPack
-}                            from '../../zones/TestZone'
+} from '../../zones/TestZone'
 import {
 	GameObjectType,
 	IGameObject,
@@ -39,6 +40,10 @@ export class Inventory {
 			// inventoryItems = []
 			// TODO: replace with above (no default equipment pack)
 			inventoryItems = addEquipmentPack(starterPack)
+			// inventoryItems = [
+			// 	...inventoryItems,
+			// 	...addEquipmentPack(debugPack)
+			// ]
 		}
 		state.inventoryItems = []
 

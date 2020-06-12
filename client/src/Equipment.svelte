@@ -1,6 +1,6 @@
 <script>
     import {createEventDispatcher, onDestroy, onMount} from 'svelte'
-    import {equipment} from './ui-state'
+    import {equipment, stats} from './ui-state'
 
     const dispatch = createEventDispatcher();
 
@@ -21,11 +21,28 @@
     function render(_, equipmentSlot) {
         let equipmentAtSlot = $equipment[equipmentSlot]
 
-        if(!equipmentAtSlot) {
+        if (!equipmentAtSlot) {
             return equipmentSlot.substr(0, 1).toUpperCase() + equipmentSlot.substr(1)
         }
 
         return equipmentAtSlot.name
+    }
+
+    function getAttack() {
+        if(!$stats) {
+            return 'N/A'
+        }
+
+        return $stats.attack.numberOfDice + 'd' + $stats.attack.diceSides
+                + '+' + $stats.attackBonus
+    }
+
+    function getArmor() {
+        if(!$stats) {
+            return 'N/A'
+        }
+
+        return $stats.armorClass
     }
 </script>
 <style>
@@ -33,7 +50,7 @@
         border: 1px solid black;
     }
 
-    td div {
+    td div.equipment-slot {
         border: 1px dotted black;
     }
 
@@ -49,8 +66,9 @@
         <td></td>
         <td>
             <div
-                    on:click="{_ => select('head')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'head')}"
+                    on:click="{_ => select('head')}"
             >
                 {render($equipment, 'head')}
             </div>
@@ -61,66 +79,85 @@
     <tr>
         <td>
             <div
-                    on:click="{_ => select('wield')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'wield')}"
+                    on:click="{_ => select('wield')}"
             >
                 {render($equipment, 'wield')}
             </div>
         </td>
         <td>
             <div
-                    on:click="{_ => select('arm')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'arm')}"
+                    on:click="{_ => select('arm')}"
             >
                 {render($equipment, 'arm')}
             </div>
         </td>
         <td>
             <div
-                    on:click="{_ => select('body')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'body')}"
+                    on:click="{_ => select('body')}"
             >
                 {render($equipment, 'body')}
             </div>
         </td>
         <td>
             <div
-                    on:click="{_ => select('light')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'light')}"
+                    on:click="{_ => select('light')}"
             >
                 {render($equipment, 'light')}
             </div>
         </td>
         <td>
             <div
-                    on:click="{_ => select('hold')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'hold')}"
+                    on:click="{_ => select('hold')}"
             >
                 {render($equipment, 'hold')}
             </div>
         </td>
     </tr>
     <tr>
-        <td></td>
+        <td>
+            <div>
+                Attack
+                <br>
+                {getAttack($stats)}
+            </div>
+        </td>
         <td></td>
         <td>
             <div
-                    on:click="{_ => select('legs')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'legs')}"
+                    on:click="{_ => select('legs')}"
             >
                 {render($equipment, 'legs')}
             </div>
         </td>
         <td></td>
-        <td></td>
+        <td>
+            <div>
+                Armor
+                <br>
+                {getArmor($stats)}
+            </div>
+        </td>
     </tr>
     <tr>
         <td></td>
         <td></td>
         <td>
             <div
-                    on:click="{_ => select('feet')}"
+                    class="equipment-slot"
                     class:hasItem="{hasItem($equipment, 'feet')}"
+                    on:click="{_ => select('feet')}"
             >
                 {render($equipment, 'feet')}
             </div>

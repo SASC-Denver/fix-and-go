@@ -22,6 +22,7 @@ import {
 import {AbstractManager} from './AbstractManager'
 import {UserDao}         from './db/dao/UserDao'
 import {IUser}           from './db/model/User'
+import {StatsManager}    from './StatsManager'
 
 const jsSHA = require('jssha')
 
@@ -32,6 +33,7 @@ export class PlayerManager
 	players: {
 		[id: number]: GamePlayer
 	}                  = {}
+	statsManager       = new StatsManager()
 	userDao            = new UserDao()
 
 	async signUp(
@@ -54,8 +56,8 @@ export class PlayerManager
 				x: 5,
 				y: 4,
 			},
-			maxHealth: 15,
-			maxMagic: 10,
+			maxHealth: 100,
+			maxEnergy: 100,
 			username: signUpRequest.username
 		}
 
@@ -64,6 +66,7 @@ export class PlayerManager
 			coins: 0,
 			equipmentState: null,
 			inventoryItems: [],
+			stats: GamePlayer.getDefaultStats()
 		}
 
 		try {
@@ -147,9 +150,13 @@ export class PlayerManager
 					player.inventory.addItem(result.unequippedItem)
 				}
 
+				this.statsManager.onEquipmentAdd(player, item, result.unequippedItem)
+
 				return {
+					attributes: player.state.attributes,
 					equipmentState: player.state.equipmentState,
 					inventoryItems: player.state.inventoryItems,
+					stats: player.state.stats,
 					success: true
 				} as IEquipItemResponse
 			})
@@ -174,9 +181,13 @@ export class PlayerManager
 
 			player.inventory.addItem(removedItem)
 
+			this.statsManager.onEquipmentRemove(player, removedItem)
+
 			return {
+				attributes: player.state.attributes,
 				equipmentState: player.state.equipmentState,
 				inventoryItems: player.state.inventoryItems,
+				stats: player.state.stats,
 				success: true
 			} as IEquipItemResponse
 		})

@@ -157,7 +157,16 @@ export class Zone {
 					this.add(new GameBoss({
 						attributes: attributes as IGameBossAttributes,
 						coins: 0,
-						inventoryItems: []
+						inventoryItems: [],
+						stats: {
+							armorClass: 0,
+							attack: {
+								diceSides: 0,
+								numberOfDice: 0,
+							},
+							attackBonus: 0,
+							sightRange: 1
+						}
 					}))
 					break
 				case GameObjectType.ITEM:
@@ -176,7 +185,8 @@ export class Zone {
 							attributes: attributes as IGamePlayerAttributes,
 							coins: 0,
 							equipmentState: null,
-							inventoryItems: []
+							inventoryItems: [],
+							stats: GamePlayer.getDefaultStats()
 						})
 					}
 					this.add(newPlayer)

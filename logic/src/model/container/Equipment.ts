@@ -21,6 +21,41 @@ export interface IEquipmentState {
 export interface IEquipmentAttributes
 	extends IGameItemAttributes {
 	equipmentSlot: EquipmentSlot
+	modifiers: IEquipmentModifier[]
+}
+
+export enum EquipmentModifierType {
+	ARMOR,
+	ATTACK,
+	ATTACK_BONUS,
+	ENERGY_BONUS,
+	HEALTH_BONUS,
+	LIGHT
+}
+
+export interface IEquipmentModifier {
+	type: EquipmentModifierType
+}
+
+export interface IEquipmentArmorModifier
+	extends IEquipmentModifier {
+	armorClass: number
+}
+
+export interface IEquipmentAttackModifier
+	extends IEquipmentModifier {
+	diceSides: number
+	numberOfDice: number
+}
+
+export interface IEquipmentAttackBonusModifier
+	extends IEquipmentModifier {
+	attackBonus: number
+}
+
+export interface IEquipmentLightModifier
+	extends IEquipmentModifier {
+	sightRange: number
 }
 
 export class Equipment {
@@ -45,7 +80,7 @@ export class Equipment {
 	}
 
 	constructor(
-		public equipmentState: IEquipmentState
+		private equipmentState: IEquipmentState
 	) {
 	}
 

@@ -1,14 +1,18 @@
 import {
 	EquipmentSlot,
 	IEquipmentState
-}                            from '../container/Equipment'
-import {TradeDealChangeType} from '../container/TradeDeal'
-import {GameObjectType}      from '../game'
+}                                 from '../container/Equipment'
+import {TradeDealChangeType}      from '../container/TradeDeal'
+import {GameObjectType}           from '../game'
+import {IGameCharacterStatistics} from '../GameCharacter'
 import {
 	IGameItemAttributes,
 	IGameItemIdentifier
-}                            from '../GameItem'
-import {IGamePlayerState}    from '../GamePlayer'
+}                                 from '../GameItem'
+import {
+	IGamePlayerAttributes,
+	IGamePlayerState
+}                                 from '../GamePlayer'
 
 export enum ErrorCode {
 	INVALID_REQUEST,
@@ -193,8 +197,10 @@ export interface IEquipItemRequest
 
 export interface IEquipItemResponse
 	extends IResponse {
+	attributes: IGamePlayerAttributes
 	equipmentState: IEquipmentState
 	inventoryItems: IGameItemAttributes[]
+	stats: IGameCharacterStatistics
 	success: boolean
 }
 
@@ -205,7 +211,9 @@ export interface IUnequipItemRequest
 
 export interface IUnequipItemResponse
 	extends IResponse {
+	attributes: IGamePlayerAttributes
 	equipmentState: IEquipmentState
 	inventoryItems: IGameItemAttributes[]
+	stats: IGameCharacterStatistics
 	success: boolean
 }

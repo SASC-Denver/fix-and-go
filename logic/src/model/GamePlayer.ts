@@ -7,8 +7,9 @@ import {GameObjectType} from './game'
 import {
 	GameCharacter,
 	IGameCharacterAttributes,
-	IGameCharacterState
-}                       from './GameCharacter'
+	IGameCharacterState,
+	IGameCharacterStatistics,
+} from './GameCharacter'
 
 export interface IGamePlayerState
 	extends IGameCharacterState {
@@ -28,6 +29,18 @@ export interface IGamePlayerAttributes
 export class GamePlayer
 	extends GameCharacter {
 
+	static getDefaultStats(): IGameCharacterStatistics {
+		return {
+			armorClass: 0,
+			attack: {
+				diceSides: 5,
+				numberOfDice: 1
+			},
+			attackBonus: 0,
+			sightRange: 0,
+		}
+	}
+
 	lastSecondOf: {
 		move: number
 	} = {
@@ -45,6 +58,10 @@ export class GamePlayer
 
 		if (!state.equipmentState) {
 			state.equipmentState = Equipment.ensureEquipmentState(null)
+		}
+
+		if (!state.stats) {
+			state.stats = GamePlayer.getDefaultStats()
 		}
 
 		this.equipment = new Equipment(

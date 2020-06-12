@@ -11,14 +11,25 @@ export interface IGameCharacterState {
 	attributes: IGameCharacterAttributes
 	inventoryItems: IGameItemAttributes[]
 	coins: number
+	stats: IGameCharacterStatistics
 }
 
 export interface IGameCharacterAttributes
 	extends IGameObjectAttributes {
 	health?: number;
-	magic?: number;
+	energy?: number;
 	maxHealth: number;
-	maxMagic: number;
+	maxEnergy: number;
+}
+
+export interface IGameCharacterStatistics {
+	armorClass: number
+	attack: {
+		numberOfDice: number
+		diceSides: number
+	}
+	attackBonus: number
+	sightRange: number
 }
 
 /**
@@ -61,11 +72,18 @@ export class GameCharacter
 
 		const attributes = state.attributes
 
+		if ((attributes as any).maxMagic) {
+			delete (attributes as any).maxMagic
+			delete (attributes as any).magic
+			attributes.maxEnergy = 100
+			attributes.maxHealth = 100
+		}
+
 		if (!attributes.health) {
 			attributes.health = attributes.maxHealth
 		}
-		if (!attributes.magic) {
-			attributes.magic = attributes.maxMagic
+		if (!attributes.energy) {
+			attributes.energy = attributes.maxEnergy
 		}
 	}
 

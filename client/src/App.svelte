@@ -19,6 +19,7 @@
     import Map from './Map.svelte'
     import Stats from './Stats.svelte'
     import {
+        attributes,
         equipment,
         getCredentials,
         inventory,
@@ -29,6 +30,7 @@
         showSignIn,
         showZoneItems,
         signInError,
+        stats,
         tradeDeal,
         tradeDealError,
         zoneItemsError
@@ -77,7 +79,7 @@
         }
         player = new GamePlayer(playerData.state);
         testZone.add(player);
-        updateEquipmentAndInventory(playerData.state)
+        updatePlayerState(playerData.state)
         updateFromServer().then()
     }
 
@@ -385,7 +387,7 @@
                 itemType: item.itemType
             }
         })
-        updateEquipmentAndInventory(data)
+        updatePlayerState(data)
     }
 
     function unequipItem(
@@ -401,17 +403,19 @@
             playerId: player.attributes.id,
             equipmentSlot
         })
-        updateEquipmentAndInventory(data)
+        updatePlayerState(data)
     }
 
-    function updateEquipmentAndInventory(
+    function updatePlayerState(
             data
     ) {
         if (!data) {
             return
         }
+        attributes.set(data.attributes)
         equipment.set(data.equipmentState)
         inventory.set(data.inventoryItems)
+        stats.set(data.stats)
     }
 
     async function getData(
@@ -546,7 +550,7 @@
     }
 
     .stats td {
-        width: 325px;
+        width: 430px;
     }
 </style>
 
@@ -555,7 +559,9 @@
         <table>
             <tr>
                 <td>
-                    <Stats></Stats>
+                    <Stats
+                            attributes="{$attributes}"
+                    ></Stats>
                 </td>
                 <td></td>
             </tr>
